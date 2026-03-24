@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<script>
+(function(){
+    var t = localStorage.getItem('theme');
+    if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme:dark)').matches))
+        document.documentElement.classList.add('dark');
+})();
+</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +15,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -34,11 +43,26 @@
             }
         }
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('nav', { open: false });
+            Alpine.store('theme', {
+                dark: document.documentElement.classList.contains('dark'),
+                toggle() {
+                    this.dark = !this.dark;
+                    document.documentElement.classList.toggle('dark', this.dark);
+                    localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                },
+                init() {
+                    window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', function(e) {
+                        if (!localStorage.getItem('theme')) {
+                            Alpine.store('theme').dark = e.matches;
+                            document.documentElement.classList.toggle('dark', e.matches);
+                        }
+                    });
+                }
+            });
         });
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
@@ -65,29 +89,120 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
+        /* ── Theme CSS Custom Properties ── */
+        :root {
+            --page-bg: #f0eff9;
+            --header-bg: #dddcf2;
+            --header-border: #b8b3e3;
+            --surface-primary: #ffffff;
+            --surface-secondary: #f8fafc;
+            --surface-tertiary: #f0eff9;
+            --text-primary: #111827;
+            --text-secondary: #312d63;
+            --text-tertiary: #3d3878;
+            --text-muted: #9188d4;
+            --text-light: #6b7280;
+            --border-primary: #e5e7eb;
+            --border-secondary: #b8b3e3;
+            --border-subtle: #f1f5f9;
+            --accent-primary: #4d47a8;
+            --accent-secondary: #6b5fc4;
+            --accent-hover: #c9c5e8;
+            --accent-gradient-from: #4d47a8;
+            --accent-gradient-to: #3d3878;
+            --nav-active-bg: #4d47a8;
+            --nav-active-text: #ffffff;
+            --dropdown-bg: #ffffff;
+            --dropdown-border: #f3f4f6;
+            --dropdown-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            --dropdown-hover: #f9fafb;
+            --dropdown-active-bg: #f5f3ff;
+            --dropdown-active-text: #6d28d9;
+            --dropdown-divider: #f3f4f6;
+            --table-header-bg: #312d63;
+            --table-total-bg: #dddcf2;
+            --table-row-hover: #f8fafc;
+            --scrollbar-thumb: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #e5e7eb;
+            --input-text: #111827;
+            --badge-bg: #f0eff9;
+            --badge-text: #4d47a8;
+        }
+        .dark {
+            --page-bg: #0f0e1a;
+            --header-bg: #1a1830;
+            --header-border: #2d2a50;
+            --surface-primary: #1e1b33;
+            --surface-secondary: #161428;
+            --surface-tertiary: #252244;
+            --text-primary: #e8e6f0;
+            --text-secondary: #c4c0e0;
+            --text-tertiary: #b0ace0;
+            --text-muted: #7a74b0;
+            --text-light: #8888a0;
+            --border-primary: #2d2a50;
+            --border-secondary: #3a3660;
+            --border-subtle: #1e1b33;
+            --accent-primary: #6b5fc4;
+            --accent-secondary: #8478d8;
+            --accent-hover: #2d2860;
+            --accent-gradient-from: #6b5fc4;
+            --accent-gradient-to: #4d47a8;
+            --nav-active-bg: #6b5fc4;
+            --nav-active-text: #ffffff;
+            --dropdown-bg: #1e1b33;
+            --dropdown-border: #2d2a50;
+            --dropdown-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            --dropdown-hover: #252244;
+            --dropdown-active-bg: #2d2860;
+            --dropdown-active-text: #b0ace0;
+            --dropdown-divider: #2d2a50;
+            --table-header-bg: #1e1b33;
+            --table-total-bg: #252244;
+            --table-row-hover: #252244;
+            --scrollbar-thumb: #3a3660;
+            --input-bg: #1e1b33;
+            --input-border: #2d2a50;
+            --input-text: #e8e6f0;
+            --badge-bg: #252244;
+            --badge-text: #b0ace0;
+        }
+        @media print {
+            :root, .dark {
+                --page-bg: #ffffff;
+                --header-bg: #dddcf2;
+                --surface-primary: #ffffff;
+                --text-primary: #111827;
+                --text-secondary: #312d63;
+                --text-tertiary: #3d3878;
+                --border-primary: #e5e7eb;
+            }
+        }
+        /* ── Scrollbar ── */
         .table-container::-webkit-scrollbar { height: 6px; width: 6px; }
-        .table-container::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 3px; }
+        .table-container::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 3px; }
         .table-container::-webkit-scrollbar-track { background: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased" x-data>
+<body class="font-sans antialiased" style="background:var(--page-bg);color:var(--text-primary)" x-data>
 
     <!-- Skip to main content -->
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:bg-indigo-600 focus:text-white focus:px-4 focus:py-2 focus:text-sm">Skip to main content</a>
 
     <!-- Header -->
-    <header class="sticky top-0 z-30" style="background:#dddcf2;border-bottom:1px solid #b8b3e3">
+    <header class="sticky top-0 z-30" style="background:var(--header-bg);border-bottom:1px solid var(--header-border)">
         <div class="px-4 lg:px-8">
             <div class="flex items-center h-12">
                 <!-- Left: Logo -->
                 <div class="flex items-center gap-1 flex-shrink-0">
                     <% const _cp = locals.currentPath || ''; %>
                     <% if (locals.user && (_cp.startsWith('/ar') || _cp.startsWith('/admin'))) { %>
-                    <button class="sm:hidden p-2.5 rounded-lg transition-colors" style="color:#4d47a8"
-                        onmouseover="this.style.background='#dddcf2'" onmouseout="this.style.background='transparent'"
+                    <button class="sm:hidden p-2.5 rounded-lg transition-colors" style="color:var(--accent-primary)"
+                        onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background='transparent'"
                         @click="$store.nav.open = !$store.nav.open" aria-label="Toggle menu">
                         <svg x-show="!$store.nav.open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -99,7 +214,7 @@
                     <% } %>
                     <a href="/" class="flex items-center gap-1.5 mr-1">
                         <img src="/kosca-logo.png" alt="Kosca" style="height:32px;width:32px;object-fit:contain;">
-                        <span class="text-sm font-bold tracking-tight hidden sm:inline" style="color:#3d3878">Kosca Distribution LLP</span>
+                        <span class="text-sm font-bold tracking-tight hidden sm:inline" style="color:var(--text-tertiary)">Kosca Distribution LLP</span>
                     </a>
                     <%
                         const _hm = locals.hasModule || function(){ return false; };
@@ -124,51 +239,63 @@
                     <nav class="hidden sm:flex items-center justify-center gap-0.5 flex-1">
                         <% if (_canDash) { %>
                         <a href="/ar" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
-                           style="<%= _cp === '/ar' ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
-                           onmouseover="<%= _cp !== '/ar' ? "this.style.background='#c9c5e8'" : '' %>"
+                           style="<%= _cp === '/ar' ? 'background:var(--nav-active-bg);color:var(--nav-active-text)' : 'color:var(--text-tertiary)' %>"
+                           onmouseover="<%= _cp !== '/ar' ? "this.style.background='var(--accent-hover)'" : '' %>"
                            onmouseout="<%= _cp !== '/ar' ? "this.style.background=''" : '' %>">Home</a>
                         <% } %>
                         <% if (_canDir) { %>
                         <a href="/ar/directory" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
-                           style="<%= _cp.startsWith('/ar/directory') ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
-                           onmouseover="<%= !_cp.startsWith('/ar/directory') ? "this.style.background='#c9c5e8'" : '' %>"
+                           style="<%= _cp.startsWith('/ar/directory') ? 'background:var(--nav-active-bg);color:var(--nav-active-text)' : 'color:var(--text-tertiary)' %>"
+                           onmouseover="<%= !_cp.startsWith('/ar/directory') ? "this.style.background='var(--accent-hover)'" : '' %>"
                            onmouseout="<%= !_cp.startsWith('/ar/directory') ? "this.style.background=''" : '' %>">AR</a>
                         <a href="/ar/groups" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
-                           style="<%= _cp.startsWith('/ar/groups') ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
-                           onmouseover="<%= !_cp.startsWith('/ar/groups') ? "this.style.background='#c9c5e8'" : '' %>"
+                           style="<%= _cp.startsWith('/ar/groups') ? 'background:var(--nav-active-bg);color:var(--nav-active-text)' : 'color:var(--text-tertiary)' %>"
+                           onmouseover="<%= !_cp.startsWith('/ar/groups') ? "this.style.background='var(--accent-hover)'" : '' %>"
                            onmouseout="<%= !_cp.startsWith('/ar/groups') ? "this.style.background=''" : '' %>">Groups</a>
                         <% } %>
                         <% if (_canPS) { %>
                         <a href="/ar/pending-settlement" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
-                           style="<%= _cp.startsWith('/ar/pending-settlement') ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
-                           onmouseover="<%= !_cp.startsWith('/ar/pending-settlement') ? "this.style.background='#c9c5e8'" : '' %>"
+                           style="<%= _cp.startsWith('/ar/pending-settlement') ? 'background:var(--nav-active-bg);color:var(--nav-active-text)' : 'color:var(--text-tertiary)' %>"
+                           onmouseover="<%= !_cp.startsWith('/ar/pending-settlement') ? "this.style.background='var(--accent-hover)'" : '' %>"
                            onmouseout="<%= !_cp.startsWith('/ar/pending-settlement') ? "this.style.background=''" : '' %>">Pending Settlement</a>
                         <% } %>
                         <% if (_hasAdmin) { %>
-                        <div class="w-px h-4 mx-1" style="background:#b8b3e3"></div>
+                        <div class="w-px h-4 mx-1" style="background:var(--border-secondary)"></div>
                         <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                             <button @click="open = !open" :aria-expanded="open" class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
-                                    style="<%= _admChild ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>">
+                                    style="<%= _admChild ? 'background:var(--nav-active-bg);color:var(--nav-active-text)' : 'color:var(--text-tertiary)' %>">
                                 Settings
                                 <svg class="w-2.5 h-2.5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-cloak x-transition class="absolute left-0 top-full mt-1 w-44 bg-white rounded-lg border border-gray-100 py-1" style="box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:50">
-                                <% if (_canUp) { %><a href="/ar/upload" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/ar/upload') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Upload</a><% } %>
-                                <% if (_canAsgn) { %><a href="/ar/assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/ar/assignments') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">CO Assign</a><% } %>
-                                <% if (_canKA || _canSD) { %><a href="/admin/categories" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/categories') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Categories</a><% } %>
-                                <% if (_canKA || _canSD || _isAdmin || _canSA || _canGI) { %><div class="h-px bg-gray-100 my-1 mx-2"></div><% } %>
-                                <% if (_isAdmin) { %><a href="/admin/users" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/users') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Users</a><% } %>
-                                <% if (_canSA) { %><a href="/admin/site-assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/site-assignments') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Change Code Location</a><% } %>
-                                <% if (_canGI) { %><a href="/admin/group-import" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/group-import') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Group Import</a><% } %>
-                                <% if (_isAdmin) { %><a href="/admin/branding" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/branding') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Branding</a><% } %>
+                            <div x-show="open" x-cloak x-transition class="absolute left-0 top-full mt-1 w-44 rounded-lg py-1" style="background:var(--dropdown-bg);border:1px solid var(--dropdown-border);box-shadow:var(--dropdown-shadow);z-index:50">
+                                <% if (_canUp) { %><a href="/ar/upload" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/ar/upload') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/ar/upload') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/ar/upload') ? "this.style.background=''" : '' %>">Upload</a><% } %>
+                                <% if (_canAsgn) { %><a href="/ar/assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/ar/assignments') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/ar/assignments') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/ar/assignments') ? "this.style.background=''" : '' %>">CO Assign</a><% } %>
+                                <% if (_canKA || _canSD) { %><a href="/admin/categories" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/categories') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/categories') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/categories') ? "this.style.background=''" : '' %>">Categories</a><% } %>
+                                <% if (_canKA || _canSD || _isAdmin || _canSA || _canGI) { %><div class="h-px my-1 mx-2" style="background:var(--dropdown-divider)"></div><% } %>
+                                <% if (_isAdmin) { %><a href="/admin/users" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/users') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/users') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/users') ? "this.style.background=''" : '' %>">Users</a><% } %>
+                                <% if (_canSA) { %><a href="/admin/site-assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/site-assignments') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/site-assignments') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/site-assignments') ? "this.style.background=''" : '' %>">Change Code Location</a><% } %>
+                                <% if (_canGI) { %><a href="/admin/group-import" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/group-import') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/group-import') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/group-import') ? "this.style.background=''" : '' %>">Group Import</a><% } %>
+                                <% if (_isAdmin) { %><a href="/admin/branding" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/branding') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/branding') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/branding') ? "this.style.background=''" : '' %>">Branding</a><% } %>
                             </div>
                         </div>
                         <% } %>
                     </nav>
                 <% } %>
 
-                <!-- Right: User -->
+                <!-- Right: Theme Toggle + User -->
                 <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 ml-auto">
+                    <!-- Theme toggle -->
+                    <button @click="$store.theme.toggle()" class="p-1.5 rounded-lg transition-colors"
+                            :title="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"
+                            style="color:var(--text-muted)"
+                            onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background=''">
+                        <svg x-show="!$store.theme.dark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                        <svg x-show="$store.theme.dark" x-cloak style="display:none" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </button>
                     <% if (locals.user) { %>
                         <%
                             const si = locals.syncInfo || {};
@@ -180,25 +307,25 @@
                         %>
                         <% if (_syncParts.length) { %>
                         <div class="relative" title="<%= _syncTooltip %>" style="cursor:default">
-                            <svg class="w-4 h-4" style="color:#9188d4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" style="color:var(--text-muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
                         </div>
                         <% } %>
                         <div class="hidden sm:flex flex-col items-end">
-                            <span class="text-xs font-semibold leading-none" style="color:#312d63"><%= locals.user.name %></span>
-                            <span class="text-[9px] uppercase font-bold tracking-wider mt-0.5" style="color:#9188d4"><%= locals.user.role %></span>
+                            <span class="text-xs font-semibold leading-none" style="color:var(--text-secondary)"><%= locals.user.name %></span>
+                            <span class="text-[9px] uppercase font-bold tracking-wider mt-0.5" style="color:var(--text-muted)"><%= locals.user.role %></span>
                         </div>
-                        <div class="h-7 w-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0" style="background:linear-gradient(135deg,#4d47a8,#3d3878)">
+                        <div class="h-7 w-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0" style="background:linear-gradient(135deg,var(--accent-gradient-from),var(--accent-gradient-to))">
                             <%= locals.user.name.charAt(0).toUpperCase() %>
                         </div>
-                        <a href="/logout" aria-label="Sign Out" style="color:#9188d4;transition:color 0.15s" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#9188d4'" title="Sign Out">
+                        <a href="/logout" aria-label="Sign Out" style="color:var(--text-muted);transition:color 0.15s" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--text-muted)'" title="Sign Out">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                             </svg>
                         </a>
                     <% } else { %>
-                        <a href="/login" class="text-sm font-semibold" style="color:#3d3878">Sign In</a>
+                        <a href="/login" class="text-sm font-semibold" style="color:var(--text-tertiary)">Sign In</a>
                     <% } %>
                 </div>
             </div>

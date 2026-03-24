@@ -1,16 +1,16 @@
 <%- include('../layout', { body: `
 <div class="space-y-6">
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-lg">
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 max-w-lg">
 
         <!-- Current logo preview -->
         <div class="mb-6">
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Current Logo</p>
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Current Logo</p>
             ${logoExists
-                ? `<div class="rounded-xl border border-gray-100 bg-gray-50 p-4 flex items-center justify-center" style="min-height:80px">
+                ? `<div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 flex items-center justify-center" style="min-height:80px">
                        <img src="/kosca-logo.png?v=${Date.now()}" alt="Current logo" style="width:56px;height:56px;object-fit:contain;">
                    </div>`
-                : `<div class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-4 flex items-center justify-center text-xs text-gray-400" style="min-height:80px">
+                : `<div class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500" style="min-height:80px">
                        No logo uploaded yet
                    </div>`
             }
@@ -22,20 +22,20 @@
 
             <div class="flex items-center justify-center w-full">
                 <label for="logo-file"
-                    class="flex flex-col items-center justify-center w-full h-32 border-2 border-indigo-200 border-dashed rounded-xl cursor-pointer bg-indigo-50/40 hover:bg-indigo-50 transition-colors">
+                    class="flex flex-col items-center justify-center w-full h-32 border-2 border-indigo-200 dark:border-indigo-800 border-dashed rounded-xl cursor-pointer bg-indigo-50/40 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-4 pb-4">
                         <svg class="w-7 h-7 mb-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                         </svg>
-                        <p class="text-xs text-gray-500"><span class="font-semibold text-indigo-600">Click to upload</span> or drag and drop</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">Square image (e.g. 256×256 px) · PNG, SVG, WEBP · max 2 MB</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400"><span class="font-semibold text-indigo-600">Click to upload</span> or drag and drop</p>
+                        <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Square image (e.g. 256×256 px) · PNG, SVG, WEBP · max 2 MB</p>
                     </div>
                     <input id="logo-file" type="file" name="logo" class="hidden" accept=".png,.jpg,.jpeg,.svg,.webp"
                            @change="fileName = $event.target.files[0].name" />
                 </label>
             </div>
 
-            <div x-show="fileName" class="text-xs text-gray-700 bg-indigo-50 py-2 px-3 rounded-lg flex justify-between items-center" style="display:none;">
+            <div x-show="fileName" class="text-xs text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900/30 py-2 px-3 rounded-lg flex justify-between items-center" style="display:none;">
                 <span class="truncate pr-2" x-text="fileName"></span>
                 <svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

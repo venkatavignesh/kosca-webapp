@@ -3,48 +3,48 @@
     <h1 class="sr-only">Upload AR Reports</h1>
 
     <!-- Page Header -->
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         <div class="px-4 md:px-5 py-3.5 flex items-center">
             <div class="flex items-center gap-2.5">
-                <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100">
+                <div class="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-100 dark:border-indigo-800">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                 </div>
-                <h2 class="text-sm font-semibold text-gray-900">Data Upload &amp; Sync</h2>
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Data Upload &amp; Sync</h2>
             </div>
         </div>
     </div>
 
     <!-- Auto-Sync Section -->
     ${(arReportPath || customerMasterPath) ? `
-    <div class="bg-white rounded-xl shadow-sm border border-indigo-100 p-6">
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-800 p-6">
         <div class="flex items-start justify-between gap-4">
             <div class="flex-1 space-y-3">
-                <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
                     Auto-Sync (Every 30 Minutes)
                 </h2>
-                <div class="space-y-1.5 text-xs text-gray-500">
+                <div class="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
                     ${arReportPath ? `
                     <div class="flex items-center gap-2">
                         <span class="inline-block w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
-                        <span class="font-medium text-gray-700">AR Report:</span>
+                        <span class="font-medium text-gray-700 dark:text-gray-300">AR Report:</span>
                         <span class="font-mono truncate">${arReportPath}</span>
                     </div>
-                    <div class="flex items-center gap-2 pl-4 text-gray-400">
+                    <div class="flex items-center gap-2 pl-4 text-gray-400 dark:text-gray-500">
                         <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Last synced: <span class="font-medium text-gray-600">${lastArSync || 'Never'}</span></span>
+                        <span>Last synced: <span class="font-medium text-gray-600 dark:text-gray-400">${lastArSync || 'Never'}</span></span>
                     </div>` : ''}
                     ${customerMasterPath ? `
                     <div class="flex items-center gap-2 mt-2">
                         <span class="inline-block w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
-                        <span class="font-medium text-gray-700">Customer Master:</span>
+                        <span class="font-medium text-gray-700 dark:text-gray-300">Customer Master:</span>
                         <span class="font-mono truncate">${customerMasterPath}</span>
                     </div>
-                    <div class="flex items-center gap-2 pl-4 text-gray-400">
+                    <div class="flex items-center gap-2 pl-4 text-gray-400 dark:text-gray-500">
                         <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Last synced: <span class="font-medium text-gray-600">${lastCmSync || 'Never'}</span></span>
+                        <span>Last synced: <span class="font-medium text-gray-600 dark:text-gray-400">${lastCmSync || 'Never'}</span></span>
                     </div>` : ''}
                 </div>
             </div>
@@ -65,29 +65,29 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <!-- AR Report Upload -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-sm font-bold text-gray-900 mb-1">AR Report</h2>
-            <p class="text-xs text-gray-500 mb-4">Upload AR_Report.xlsx manually.</p>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">AR Report</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Upload AR_Report.xlsx manually.</p>
             <form hx-post="/ar/upload" hx-encoding="multipart/form-data" hx-target="#ar-upload-status" class="space-y-4"
                 x-data="{ fileName: '', uploading: false }" @submit="uploading = true">
                 <input type="hidden" name="uploadType" value="ar_report">
                 <div class="flex items-center justify-center w-full">
                     <label for="ar-file"
-                        class="flex flex-col items-center justify-center w-full h-36 border-2 border-indigo-200 border-dashed rounded-xl cursor-pointer bg-indigo-50/40 hover:bg-indigo-50 transition-colors">
+                        class="flex flex-col items-center justify-center w-full h-36 border-2 border-indigo-200 dark:border-indigo-700 border-dashed rounded-xl cursor-pointer bg-indigo-50/40 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
                         <div class="flex flex-col items-center justify-center pt-4 pb-4">
                             <svg class="w-8 h-8 mb-2 text-indigo-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 16">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
                             </svg>
-                            <p class="text-xs text-gray-500"><span class="font-semibold text-indigo-600">Click to upload</span> or drag and drop</p>
-                            <p class="text-[10px] text-gray-400 mt-0.5">.xlsx files only</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400"><span class="font-semibold text-indigo-600 dark:text-indigo-400">Click to upload</span> or drag and drop</p>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">.xlsx files only</p>
                         </div>
                         <input id="ar-file" type="file" name="excelFile" class="hidden" accept=".xlsx"
                             @change="fileName = $event.target.files[0].name" />
                     </label>
                 </div>
-                <div x-show="fileName" class="text-xs text-gray-700 bg-indigo-50 py-2 px-3 rounded-lg flex justify-between items-center" style="display:none;">
+                <div x-show="fileName" class="text-xs text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900/30 py-2 px-3 rounded-lg flex justify-between items-center" style="display:none;">
                     <span class="truncate pr-2" x-text="fileName"></span>
-                    <svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
@@ -101,29 +101,29 @@
         </div>
 
         <!-- Customer Master Upload -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-sm font-bold text-gray-900 mb-1">Customer Master</h2>
-            <p class="text-xs text-gray-500 mb-4">Upload Customer_Master_Report.xlsx manually.</p>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">Customer Master</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Upload Customer_Master_Report.xlsx manually.</p>
             <form hx-post="/ar/upload" hx-encoding="multipart/form-data" hx-target="#cm-upload-status" class="space-y-4"
                 x-data="{ fileName: '', uploading: false }" @submit="uploading = true">
                 <input type="hidden" name="uploadType" value="customer_master">
                 <div class="flex items-center justify-center w-full">
                     <label for="cm-file"
-                        class="flex flex-col items-center justify-center w-full h-36 border-2 border-indigo-200 border-dashed rounded-xl cursor-pointer bg-indigo-50/40 hover:bg-indigo-50 transition-colors">
+                        class="flex flex-col items-center justify-center w-full h-36 border-2 border-indigo-200 dark:border-indigo-700 border-dashed rounded-xl cursor-pointer bg-indigo-50/40 dark:bg-indigo-900/20 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
                         <div class="flex flex-col items-center justify-center pt-4 pb-4">
                             <svg class="w-8 h-8 mb-2 text-indigo-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 16">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
                             </svg>
-                            <p class="text-xs text-gray-500"><span class="font-semibold text-indigo-600">Click to upload</span> or drag and drop</p>
-                            <p class="text-[10px] text-gray-400 mt-0.5">.xlsx files only</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400"><span class="font-semibold text-indigo-600 dark:text-indigo-400">Click to upload</span> or drag and drop</p>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">.xlsx files only</p>
                         </div>
                         <input id="cm-file" type="file" name="excelFile" class="hidden" accept=".xlsx"
                             @change="fileName = $event.target.files[0].name" />
                     </label>
                 </div>
-                <div x-show="fileName" class="text-xs text-gray-700 bg-indigo-50 py-2 px-3 rounded-lg flex justify-between items-center" style="display:none;">
+                <div x-show="fileName" class="text-xs text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900/30 py-2 px-3 rounded-lg flex justify-between items-center" style="display:none;">
                     <span class="truncate pr-2" x-text="fileName"></span>
-                    <svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
@@ -142,11 +142,11 @@
     <div id="ar-upload-progress" hx-get="/ar/upload/status" hx-trigger="load, every 2s" hx-swap="outerHTML"></div>
 
     <!-- Column Reference -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Expected Column Headers</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600">
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Expected Column Headers</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600 dark:text-gray-400">
             <div>
-                <p class="font-semibold text-gray-700 mb-1">AR Report</p>
+                <p class="font-semibold text-gray-700 dark:text-gray-300 mb-1">AR Report</p>
                 <ul class="space-y-0.5 list-disc pl-4">
                     <li>DISTRIBUTOR_NAME, INVOICE_NO, Customer_Code</li>
                     <li>CUSTOMER_NAME, INVOICE_DATE, Due Date</li>
@@ -154,7 +154,7 @@
                 </ul>
             </div>
             <div>
-                <p class="font-semibold text-gray-700 mb-1">Customer Master</p>
+                <p class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Customer Master</p>
                 <ul class="space-y-0.5 list-disc pl-4">
                     <li>CUSTOMER_CODE / Acc Code / Party Code</li>
                     <li>CUSTOMER_NAME / Acc Name / Party Name</li>

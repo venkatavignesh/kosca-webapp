@@ -18,44 +18,44 @@
             </div>
 
             <!-- Users Data Table -->
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                 <!-- Card Header -->
-                <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 flex items-center">
+                <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 flex items-center">
                     <div class="flex items-center gap-2.5">
-                        <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100">
+                        <div class="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-lg border border-indigo-100 dark:border-indigo-800">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </div>
-                        <h2 class="text-sm font-semibold text-gray-900">Users</h2>
+                        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Users</h2>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-100">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
                                 <th scope="col"
-                                    class="py-2.5 pl-6 pr-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    class="py-2.5 pl-6 pr-3 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                     Name</th>
                                 <th scope="col"
-                                    class="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    class="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                     Email</th>
                                 <th scope="col"
-                                    class="px-4 py-2.5 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    class="px-4 py-2.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                     Role</th>
                                 <th scope="col"
-                                    class="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    class="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                     Module Access</th>
                                 <th scope="col"
                                     class="px-4 py-2.5 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider sm:pr-6">
                                     Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 bg-white">
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-[var(--surface-primary)]">
                             <% users.forEach(function(u) { %>
-                                <tr class="hover:bg-gray-50/50 transition-colors">
-                                    <td class="whitespace-nowrap py-2.5 pl-6 pr-3 text-sm font-bold text-gray-900">
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800 transition-colors">
+                                    <td class="whitespace-nowrap py-2.5 pl-6 pr-3 text-sm font-bold text-gray-900 dark:text-gray-100">
                                         <div class="flex items-center gap-3">
                                             <div
-                                                class="h-8 w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300 flex items-center justify-center text-gray-600 font-bold text-xs shadow-sm">
+                                                class="h-8 w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 border border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-xs shadow-sm">
                                                 <%= u.name.charAt(0).toUpperCase() %>
                                             </div>
                                             <%= u.name %>
@@ -65,7 +65,7 @@
                                                     <% } %>
                                         </div>
                                     </td>
-                                    <td class="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-gray-500">
+                                    <td class="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400">
                                         <%= u.email %>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-2.5 text-sm text-center">
@@ -79,7 +79,7 @@
                                                 <%= u.role %>
                                             </span>
                                     </td>
-                                    <td class="px-4 py-2.5 text-sm text-gray-500">
+                                    <td class="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">
                                         <div class="flex flex-wrap gap-1.5">
                                             <% var allModules = [
                                                 { key: 'ar_dashboard',           label: 'Dashboard' },
@@ -98,7 +98,7 @@
                                                 { key: 'admin_sub_distributors', label: 'Manage Sub D' },
                                             ]; %>
                                             <% allModules.forEach(function(mod) { var assigned = u.modules && u.modules.includes(mod.key); %>
-                                                <span class="inline-flex items-center rounded-md px-2 py-1 text-[10px] font-semibold ring-1 ring-inset shadow-sm border <%= assigned ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20 border-indigo-100/50' : 'bg-gray-100 text-gray-400 ring-gray-200 border-gray-200 line-through' %>">
+                                                <span class="inline-flex items-center rounded-md px-2 py-1 text-[10px] font-semibold ring-1 ring-inset shadow-sm border <%= assigned ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 ring-indigo-600/20 border-indigo-100/50 dark:border-indigo-800' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 ring-gray-200 dark:ring-gray-700 border-gray-200 dark:border-gray-700 line-through' %>">
                                                     <%= mod.label %>
                                                 </span>
                                             <% }); %>
@@ -107,7 +107,7 @@
                                     <td class="whitespace-nowrap px-4 py-2.5 text-sm text-center sm:pr-6">
                                         <button @click="$dispatch('open-modal', 'edit-user-modal-<%= u.id %>')"
                                             type="button"
-                                            class="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors mr-1"
+                                            class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors mr-1"
                                             title="Edit User">
                                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                                 stroke="currentColor">
@@ -120,7 +120,7 @@
                                                 onsubmit="return confirm('Are you sure you want to delete this user?');"
                                                 class="inline">
                                                 <button type="submit"
-                                                    class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                    class="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                                                     title="Delete User">
                                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                                         stroke-width="1.5" stroke="currentColor">
@@ -135,7 +135,7 @@
                                 <% }); %>
                                     <% if (users.length===0) { %>
                                         <tr>
-                                            <td colspan="5" class="py-12 text-center text-sm text-gray-500">No users
+                                            <td colspan="5" class="py-12 text-center text-sm text-gray-500 dark:text-gray-400">No users
                                                 found.</td>
                                         </tr>
                                         <% } %>
@@ -162,15 +162,15 @@
                     x-transition:leave="ease-in duration-200"
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100">
+                    class="relative transform overflow-hidden rounded-3xl bg-white dark:bg-[var(--surface-primary)] text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100 dark:border-gray-700">
                     <form action="/admin/users" method="POST" class="p-8">
                         <div class="flex items-center justify-between mb-8">
                             <div>
-                                <h3 class="text-xl font-bold leading-6 text-gray-900">Add New User</h3>
-                                <p class="mt-1 text-sm text-gray-500">Assign roles and dashboard modules.</p>
+                                <h3 class="text-xl font-bold leading-6 text-gray-900 dark:text-gray-100">Add New User</h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Assign roles and dashboard modules.</p>
                             </div>
                             <button type="button" @click="open = false"
-                                class="rounded-full bg-gray-100 p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-200 transition-colors focus:outline-none">
+                                class="rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -180,36 +180,36 @@
                         <div class="space-y-5">
                             <div class="grid grid-cols-2 gap-5">
                                 <div class="col-span-2">
-                                    <label for="name" class="block text-sm font-semibold text-gray-700">Full
+                                    <label for="name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Full
                                         Name</label>
                                     <input type="text" name="name" id="name" required
-                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)] dark:text-[var(--input-text)]">
                                 </div>
                                 <div class="col-span-2">
-                                    <label for="email" class="block text-sm font-semibold text-gray-700">Email
+                                    <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Email
                                         Address</label>
                                     <input type="email" name="email" id="email" required
-                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)] dark:text-[var(--input-text)]">
                                 </div>
                                 <div class="col-span-2 sm:col-span-1">
                                     <label for="password"
-                                        class="block text-sm font-semibold text-gray-700">Password</label>
+                                        class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Password</label>
                                     <input type="password" name="password" id="password" required
-                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)] dark:text-[var(--input-text)]">
                                 </div>
                                 <div class="col-span-2 sm:col-span-1">
-                                    <label for="role" class="block text-sm font-semibold text-gray-700">System
+                                    <label for="role" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">System
                                         Role</label>
                                     <select id="role" name="role"
-                                        class="mt-2 block w-full rounded-xl border-0 py-3 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 cursor-pointer font-medium hover:ring-gray-400 transition-colors">
+                                        class="mt-2 block w-full rounded-xl border-0 py-3 pl-3 pr-10 text-gray-900 dark:text-[var(--input-text)] shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 cursor-pointer font-medium hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)]">
                                         <option value="USER">Standard User</option>
                                         <option value="MANAGER">Manager</option>
                                         <option value="ADMIN">Administrator</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="pt-4 border-t border-gray-100">
-                                <label class="block text-sm font-bold text-gray-900 mb-3">Module Assignments</label>
+                            <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                                <label class="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Module Assignments</label>
                                 <div class="grid grid-cols-2 gap-x-4 gap-y-3">
                                     <% var createModules = [
                                         { key: 'ar_dashboard',           label: 'Dashboard',            desc: 'AR metrics overview' },
@@ -231,11 +231,11 @@
                                     <div class="relative flex items-start group">
                                         <div class="flex h-5 items-center mt-0.5">
                                             <input id="mod_<%= mod.key %>" name="modules" value="<%= mod.key %>" type="checkbox"
-                                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer">
+                                                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-600 cursor-pointer dark:bg-gray-800">
                                         </div>
                                         <div class="ml-2.5 text-sm leading-6">
-                                            <label for="mod_<%= mod.key %>" class="font-medium text-gray-900 cursor-pointer text-xs"><%= mod.label %></label>
-                                            <p class="text-gray-400 text-[10px]"><%= mod.desc %></p>
+                                            <label for="mod_<%= mod.key %>" class="font-medium text-gray-900 dark:text-gray-100 cursor-pointer text-xs"><%= mod.label %></label>
+                                            <p class="text-gray-400 dark:text-gray-500 text-[10px]"><%= mod.desc %></p>
                                         </div>
                                     </div>
                                     <% }); %>
@@ -247,7 +247,7 @@
                                 class="inline-flex w-full justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 transition-all sm:w-auto">Create
                                 User</button>
                             <button type="button" @click="open = false"
-                                class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all sm:mt-0 sm:w-auto">Cancel</button>
+                                class="mt-3 inline-flex w-full justify-center rounded-xl bg-white dark:bg-gray-800 px-5 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all sm:mt-0 sm:w-auto">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -271,19 +271,19 @@
                         x-transition:leave="ease-in duration-200"
                         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                        class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100">
+                        class="relative transform overflow-hidden rounded-3xl bg-white dark:bg-[var(--surface-primary)] text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100 dark:border-gray-700">
                         <form action="/admin/users/<%= u.id %>/edit" method="POST" class="p-8">
                             <div class="flex items-center justify-between mb-8">
                                 <div>
-                                    <h3 class="text-xl font-bold leading-6 text-gray-900">Edit User</h3>
-                                    <p class="mt-1 text-sm text-gray-500">Update credentials and permissions for
+                                    <h3 class="text-xl font-bold leading-6 text-gray-900 dark:text-gray-100">Edit User</h3>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update credentials and permissions for
                                         <strong>
                                             <%= u.name %>
                                         </strong>.
                                     </p>
                                 </div>
                                 <button type="button" @click="open = false"
-                                    class="rounded-full bg-gray-100 p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-200 transition-colors focus:outline-none">
+                                    class="rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -294,30 +294,30 @@
                                 <div class="grid grid-cols-2 gap-5">
                                     <div class="col-span-2">
                                         <label for="name-<%= u.id %>"
-                                            class="block text-sm font-semibold text-gray-700">Full Name</label>
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Full Name</label>
                                         <input type="text" name="name" id="name-<%= u.id %>" value="<%= u.name %>"
                                             required
                                             class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
                                     </div>
                                     <div class="col-span-2">
                                         <label for="email-<%= u.id %>"
-                                            class="block text-sm font-semibold text-gray-700">Email Address</label>
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Email Address</label>
                                         <input type="email" name="email" id="email-<%= u.id %>" value="<%= u.email %>"
                                             required
                                             class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
                                     </div>
                                     <div class="col-span-2 sm:col-span-1">
                                         <label for="password-<%= u.id %>"
-                                            class="block text-sm font-semibold text-gray-700">New Password</label>
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300">New Password</label>
                                         <input type="password" name="password" id="password-<%= u.id %>"
                                             placeholder="Leave blank to keep"
-                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)] dark:text-[var(--input-text)]">
                                     </div>
                                     <div class="col-span-2 sm:col-span-1">
                                         <label for="role-<%= u.id %>"
-                                            class="block text-sm font-semibold text-gray-700">System Role</label>
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300">System Role</label>
                                         <select id="role-<%= u.id %>" name="role"
-                                            class="mt-2 block w-full rounded-xl border-0 py-3 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 cursor-pointer font-medium hover:ring-gray-400 transition-colors">
+                                            class="mt-2 block w-full rounded-xl border-0 py-3 pl-3 pr-10 text-gray-900 dark:text-[var(--input-text)] shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 cursor-pointer font-medium hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)]">
                                             <option value="USER" <%=u.role==='USER' ? 'selected' : '' %>>Standard User
                                             </option>
                                             <option value="MANAGER" <%=u.role==='MANAGER' ? 'selected' : '' %>>Manager
@@ -327,8 +327,8 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="pt-4 border-t border-gray-100">
-                                    <label class="block text-sm font-bold text-gray-900 mb-3">Module Assignments</label>
+                                <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                                    <label class="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Module Assignments</label>
                                     <div class="grid grid-cols-2 gap-x-4 gap-y-3">
                                         <% var editModules = [
                                             { key: 'ar_dashboard',           label: 'Dashboard',            desc: 'AR metrics overview' },
@@ -351,11 +351,11 @@
                                             <div class="flex h-5 items-center mt-0.5">
                                                 <input id="mod_<%= mod.key %>_<%= u.id %>" name="modules" value="<%= mod.key %>" type="checkbox"
                                                     <%= u.modules.includes(mod.key) ? 'checked' : '' %>
-                                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer">
+                                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-600 cursor-pointer dark:bg-gray-800">
                                             </div>
                                             <div class="ml-2.5 text-sm leading-6">
-                                                <label for="mod_<%= mod.key %>_<%= u.id %>" class="font-medium text-gray-900 cursor-pointer text-xs"><%= mod.label %></label>
-                                                <p class="text-gray-400 text-[10px]"><%= mod.desc %></p>
+                                                <label for="mod_<%= mod.key %>_<%= u.id %>" class="font-medium text-gray-900 dark:text-gray-100 cursor-pointer text-xs"><%= mod.label %></label>
+                                                <p class="text-gray-400 dark:text-gray-500 text-[10px]"><%= mod.desc %></p>
                                             </div>
                                         </div>
                                         <% }); %>
@@ -367,7 +367,7 @@
                                     class="inline-flex w-full justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 transition-all sm:w-auto">Save
                                     Changes</button>
                                 <button type="button" @click="open = false"
-                                    class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all sm:mt-0 sm:w-auto">Cancel</button>
+                                    class="mt-3 inline-flex w-full justify-center rounded-xl bg-white dark:bg-gray-800 px-5 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all sm:mt-0 sm:w-auto">Cancel</button>
                             </div>
                         </form>
                     </div>

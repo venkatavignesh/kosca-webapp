@@ -17,9 +17,9 @@
 <% if (activePsr) { %><input type="hidden" name="psr_badge" value="<%= activePsr %>"><% } %>
 
 <!-- Count bar -->
-<div class="px-5 py-2 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
-    <span class="text-xs text-gray-500">
-        <span class="font-bold text-gray-800"><%= totalGroups %></span> customer<%= totalGroups !== 1 ? 's' : '' %><% if (search) { %> for "<%= search %>"<% } %>
+<div class="px-5 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/60 flex items-center justify-between">
+    <span class="text-xs text-gray-500 dark:text-gray-400">
+        <span class="font-bold text-gray-800 dark:text-gray-200"><%= totalGroups %></span> customer<%= totalGroups !== 1 ? 's' : '' %><% if (search) { %> for "<%= search %>"<% } %>
         <% if (activeGroup) { %>
         <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 border border-violet-200">
             <%= activeGroup %>
@@ -40,7 +40,7 @@
         </span>
         <% } %>
     </span>
-    <% if (totalGroups > 0) { %><span class="text-xs text-gray-400">Showing <%= (page-1)*limit+1 %>–<%= Math.min(page*limit, totalGroups) %></span><% } %>
+    <% if (totalGroups > 0) { %><span class="text-xs text-gray-400 dark:text-gray-500">Showing <%= (page-1)*limit+1 %>–<%= Math.min(page*limit, totalGroups) %></span><% } %>
 </div>
 
 <!-- Table -->
@@ -48,13 +48,13 @@
 <% if (groups.length === 0) { %>
     <div class="py-12 text-center">
         <div class="flex flex-col items-center justify-center space-y-3">
-            <div class="p-3 bg-gray-50 rounded-full">
+            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-full">
                 <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
             </div>
-            <span class="font-medium text-sm text-gray-600">No records found.</span>
-            <span class="text-xs text-gray-400">Upload an Excel file or refine your search parameters.</span>
+            <span class="font-medium text-sm text-gray-600 dark:text-gray-400">No records found.</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500">Upload an Excel file or refine your search parameters.</span>
         </div>
     </div>
 <% } else { %>
@@ -81,24 +81,24 @@
         <col style="width:<%= _hasCO ? 12 : 13 %>%">
     </colgroup>
     <thead>
-        <tr class="border-b border-gray-200 bg-gray-50/80">
+        <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80">
             <th scope="col" class="w-8 px-3 py-2"></th>
-            <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Code</th>
-            <th scope="col" class="col-cust px-3 py-2 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Customer</th>
-            <th scope="col" class="col-grp px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Group</th>
-            <th scope="col" class="col-bde px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">BDE</th>
-            <th scope="col" class="col-out px-3 py-2 text-right text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Outstanding</th>
-            <th scope="col" class="col-inv px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Inv</th>
+            <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Code</th>
+            <th scope="col" class="col-cust px-3 py-2 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Customer</th>
+            <th scope="col" class="col-grp px-3 py-2 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Group</th>
+            <th scope="col" class="col-bde px-3 py-2 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">BDE</th>
+            <th scope="col" class="col-out px-3 py-2 text-right text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Outstanding</th>
+            <th scope="col" class="col-inv px-3 py-2 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider whitespace-nowrap">Inv</th>
             <% if (_hasCO) { %>
-            <th scope="col" class="px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">CO</th>
+            <th scope="col" class="px-3 py-2 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">CO</th>
             <% } %>
-            <th scope="col" class="px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Max Aging</th>
+            <th scope="col" class="px-3 py-2 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider whitespace-nowrap">Max Aging</th>
         </tr>
     </thead>
     <% var rowIdx = typeof rowIdx === 'undefined' ? 0 : rowIdx; %>
     <% groups.forEach(function(g) {
         rowIdx++;
-        const rowBase = rowIdx % 2 === 0 ? 'bg-gray-100' : 'bg-white';
+        const rowBase = rowIdx % 2 === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-[var(--surface-primary)]';
         const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
         const totalAmt    = g._sum.balanceAmount || 0;
         const maxAging    = g._max.agingDays || 0;
@@ -115,8 +115,8 @@
     %>
     <tbody x-data="{ open: false, loaded: false }">
         <!-- Main row -->
-        <tr class="border-b cursor-pointer select-none transition-colors hover:bg-indigo-50/30"
-            :class="open ? 'bg-indigo-50/40 !border-b-2 !border-indigo-200' : '<%= rowBase %> border-gray-100'"
+        <tr class="border-b cursor-pointer select-none transition-colors hover:bg-indigo-50/30 dark:hover:bg-indigo-900/20"
+            :class="open ? 'bg-indigo-50/40 dark:bg-indigo-900/30 !border-b-2 !border-indigo-200 dark:!border-indigo-800' : '<%= rowBase %> border-gray-100 dark:border-gray-700'"
             @click="open = !open; if (open && !loaded) { loaded = true; htmx.ajax('GET', '/ar/invoices/<%= encodeURIComponent(code) %><%= siteDetailQuery %>', '#details-<%= safeId %>') }">
 
             <!-- Expand chevron -->
@@ -151,8 +151,8 @@
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H9v-2a2 2 0 01.586-1.414z"/></svg>
                         </button>
                         <div x-show="open" x-cloak @click.stop
-                             class="absolute z-50 left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[180px]" style="display:none">
-                            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Phone Number</p>
+                             class="absolute z-50 left-0 top-full mt-1 bg-white dark:bg-[var(--dropdown-bg)] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg dark:shadow-[var(--dropdown-shadow)] p-2 min-w-[180px]" style="display:none">
+                            <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Phone Number</p>
                             <div class="flex items-center gap-1">
                                 <input type="text" x-ref="mobileInput" :value="mobile" placeholder="Enter mobile"
                                        class="flex-1 text-[10px] border border-indigo-300 rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
@@ -173,7 +173,7 @@
             <!-- Customer name + disputed -->
             <td class="col-cust px-3 py-2.5 max-w-xs">
                 <div class="flex items-center gap-1.5 overflow-hidden">
-                    <span class="text-sm font-semibold text-gray-900 truncate flex-1 min-w-0" title="<%= g.customerName || code %>"><%= g.customerName || code %></span>
+                    <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate flex-1 min-w-0" title="<%= g.customerName || code %>"><%= g.customerName || code %></span>
                     <div class="flex items-center gap-1 flex-shrink-0">
                         <% if (g.isDisputed) { %>
                         <span class="inline-flex items-center rounded px-1 py-0.5 text-[8px] font-bold bg-orange-100 text-orange-700 border border-orange-200">⚠ DISPUTED</span>
@@ -216,12 +216,12 @@
 
             <!-- Outstanding amount -->
             <td class="col-out px-3 py-2.5 text-right whitespace-nowrap">
-                <span class="text-sm font-bold text-gray-900"><%= formatter.format(totalAmt) %></span>
+                <span class="text-sm font-bold text-gray-900 dark:text-gray-100"><%= formatter.format(totalAmt) %></span>
             </td>
 
             <!-- Invoice count -->
             <td class="col-inv px-3 py-2.5 text-center whitespace-nowrap">
-                <span class="text-xs text-gray-400"><%= invoiceCount %></span>
+                <span class="text-xs text-gray-400 dark:text-gray-500"><%= invoiceCount %></span>
             </td>
 
             <!-- CO assignment -->
@@ -238,17 +238,17 @@
                         <% } %>
                     </div>
                     <div x-show="open" x-cloak @click.stop
-                         class="absolute z-50 left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[140px]" style="display:none">
-                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Toggle CO</p>
+                         class="absolute z-50 left-0 top-full mt-1 bg-white dark:bg-[var(--dropdown-bg)] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg dark:shadow-[var(--dropdown-shadow)] p-2 min-w-[140px]" style="display:none">
+                        <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Toggle CO</p>
                         <% officers.forEach(function(o) { %>
-                        <label class="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-gray-50 cursor-pointer group">
+                        <label class="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer group">
                             <input type="checkbox"
                                 <%= g.assignedOfficerIds && g.assignedOfficerIds.includes(o.id) ? 'checked' : '' %>
                                 hx-post="/ar/assignments/toggle"
                                 hx-vals='{"customerCode": "<%= code %>", "userId": "<%= o.id %>"}'
                                 hx-target="#assign-badge-<%= safeId %>" hx-swap="innerHTML" hx-trigger="change"
                                 class="rounded text-teal-600 focus:ring-teal-500 w-3 h-3" @click.stop>
-                            <span class="text-[10px] text-gray-700 group-hover:text-gray-900"><%= o.name %></span>
+                            <span class="text-[10px] text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100"><%= o.name %></span>
                         </label>
                         <% }); %>
                     </div>
@@ -279,9 +279,9 @@
             x-transition:leave="transition ease-in duration-100"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            x-cloak class="border-b-2 border-indigo-100">
+            x-cloak class="border-b-2 border-indigo-100 dark:border-indigo-800">
             <td colspan="<%= colSpan %>" class="p-0 px-1 sm:px-[20px] pb-2 sm:pb-[20px]">
-                <div class="border-l-2 sm:border-l-4 border-indigo-300 bg-slate-50/60 rounded-b-lg overflow-hidden">
+                <div class="border-l-2 sm:border-l-4 border-indigo-300 dark:border-indigo-700 bg-slate-50/60 dark:bg-gray-800/60 rounded-b-lg overflow-hidden">
                     <div id="details-<%= safeId %>">
                         <div class="py-8 flex flex-col justify-center items-center text-gray-400 space-y-3">
                             <svg class="animate-spin w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24">
@@ -308,12 +308,12 @@
 <% var siteParam = ''; if (typeof sites !== 'undefined' && sites.length) { sites.forEach(function(s){ siteParam += '&site=' + encodeURIComponent(s); }); } %>
 <% var extraParams = keyOnlyParam + subOnlyParam + psOnlyParam + bucketParam + siteParam; %>
 <% if (totalPages > 1) { %>
-    <div class="px-4 py-3 border-t border-gray-100 flex flex-col items-center gap-2">
-        <p class="text-sm text-gray-500 whitespace-nowrap">Page <span class="font-semibold text-gray-800"><%= page %></span> of <span class="font-semibold text-gray-800"><%= totalPages %></span></p>
+    <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex flex-col items-center gap-2">
+        <p class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Page <span class="font-semibold text-gray-800 dark:text-gray-200"><%= page %></span> of <span class="font-semibold text-gray-800 dark:text-gray-200"><%= totalPages %></span></p>
         <div class="flex items-center gap-1">
             <button hx-get="/ar/invoices?page=<%= Math.max(1, page-1) %><%= extraParams %>" hx-target="#table-data"
                 hx-include="[name='search'], [name='limit'], [name='sort'], [name='psr'], [name='psr_badge'], [name='group']"
-                class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors <%= page === 1 ? 'opacity-40 cursor-not-allowed' : '' %>"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors <%= page === 1 ? 'opacity-40 cursor-not-allowed' : '' %>"
                 <%= page === 1 ? 'disabled' : '' %>>Previous</button>
             <%
                var mStart = Math.max(1, page-1);
@@ -328,11 +328,11 @@
             %>
                 <button hx-get="/ar/invoices?page=<%= p %><%= extraParams %>" hx-target="#table-data"
                     hx-include="[name='search'], [name='limit'], [name='sort'], [name='psr'], [name='psr_badge'], [name='group']"
-                    class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors <%= p === page ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-200 text-gray-600 hover:bg-gray-50' %> <%= inMobile ? '' : 'hidden sm:inline-flex' %>"><%= p %></button>
+                    class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors <%= p === page ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800' %> <%= inMobile ? '' : 'hidden sm:inline-flex' %>"><%= p %></button>
             <% } %>
             <button hx-get="/ar/invoices?page=<%= Math.min(totalPages, page+1) %><%= extraParams %>" hx-target="#table-data"
                 hx-include="[name='search'], [name='limit'], [name='sort'], [name='psr'], [name='psr_badge'], [name='group']"
-                class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors <%= page === totalPages ? 'opacity-40 cursor-not-allowed' : '' %>"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors <%= page === totalPages ? 'opacity-40 cursor-not-allowed' : '' %>"
                 <%= page === totalPages ? 'disabled' : '' %>>Next</button>
         </div>
     </div>

@@ -39,33 +39,33 @@
 <%- include('../layout', { body: `<div class="max-w-5xl mx-auto space-y-6">
 
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200 dark:border-gray-700">
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <a href="/ar/directory" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">← Directory</a>
+                <a href="/ar/directory" class="text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">← Directory</a>
             </div>
-            <h1 class="text-xl font-bold text-gray-900 tracking-tight">${customerName}</h1>
-            <p class="mt-0.5 text-sm text-gray-500 font-mono">${customerCode}</p>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">${customerName}</h1>
+            <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400 font-mono">${customerCode}</p>
         </div>
         <div class="flex items-center gap-3 self-start sm:self-auto">
             <span style="background:${riskBg};color:${riskTxt};border:1px solid ${riskBorder};border-radius:9999px;padding:4px 14px;font-size:12px;font-weight:700;letter-spacing:0.04em">${riskLabel}</span>
-            <span class="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Debt Trend</span>
+            <span class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Debt Trend</span>
         </div>
     </div>
 
     <!-- Current Invoice Bucket Breakdown -->
     ${(currentInvoices && currentInvoices.length > 0) ? `
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-        <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">Current Aging Breakdown</p>
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">Current Aging Breakdown</p>
         <div class="flex gap-3 flex-wrap">
             ${buckets.map(function(b, idx) {
                 var amt = bucketTotals[idx];
                 if (amt === 0) return '';
                 var pct = Math.round(amt / (currentTotal || 1) * 100);
-                return '<div style="flex:1;min-width:100px;background:#f8fafc;border:1px solid #e2e8f0;border-top:3px solid ' + b.color + ';border-radius:10px;padding:10px 12px">'
-                    + '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">' + b.label + '</div>'
-                    + '<div style="font-size:15px;font-weight:900;color:#1e293b;font-variant-numeric:tabular-nums">' + fmt.format(amt) + '</div>'
-                    + '<div style="font-size:10px;color:#94a3b8;margin-top:2px">' + pct + '% of total</div>'
+                return '<div style="flex:1;min-width:100px;background:var(--surface-secondary);border:1px solid var(--border-secondary);border-top:3px solid ' + b.color + ';border-radius:10px;padding:10px 12px">'
+                    + '<div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">' + b.label + '</div>'
+                    + '<div style="font-size:15px;font-weight:900;color:var(--text-primary);font-variant-numeric:tabular-nums">' + fmt.format(amt) + '</div>'
+                    + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px">' + pct + '% of total</div>'
                     + '</div>';
             }).join('')}
         </div>
@@ -92,37 +92,37 @@
     ` : `
     <!-- Summary Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Current Balance</div>
-            <div class="text-xl font-black text-gray-900 tabular-nums">${fmt.format(latest.totalAmount)}</div>
-            <div class="text-[10px] text-gray-400 mt-0.5">${latest.invoiceCount} invoices</div>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">Current Balance</div>
+            <div class="text-xl font-black text-gray-900 dark:text-gray-100 tabular-nums">${fmt.format(latest.totalAmount)}</div>
+            <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${latest.invoiceCount} invoices</div>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">First Recorded</div>
-            <div class="text-xl font-black text-gray-900 tabular-nums">${fmt.format(first.totalAmount)}</div>
-            <div class="text-[10px] text-gray-400 mt-0.5">${fmtDate(first && first.snapshotDate)}</div>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">First Recorded</div>
+            <div class="text-xl font-black text-gray-900 dark:text-gray-100 tabular-nums">${fmt.format(first.totalAmount)}</div>
+            <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${fmtDate(first && first.snapshotDate)}</div>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Net Change</div>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">Net Change</div>
             <div class="text-xl font-black tabular-nums" style="color:${deltaColor}">${deltaFmt}</div>
-            <div class="text-[10px] text-gray-400 mt-0.5">${delta !== null ? Math.abs(Math.round(delta / (first.totalAmount || 1) * 100)) + '% ' + (delta > 0 ? 'increase' : 'decrease') : 'since first record'}</div>
+            <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${delta !== null ? Math.abs(Math.round(delta / (first.totalAmount || 1) * 100)) + '% ' + (delta > 0 ? 'increase' : 'decrease') : 'since first record'}</div>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Max Aging (Latest)</div>
-            <div class="text-xl font-black tabular-nums ${latest.maxAgingDays > 180 ? 'text-red-600' : latest.maxAgingDays > 90 ? 'text-orange-500' : 'text-gray-900'}">${latest.maxAgingDays}d</div>
-            <div class="text-[10px] text-gray-400 mt-0.5">${snapshots.length} data points</div>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">Max Aging (Latest)</div>
+            <div class="text-xl font-black tabular-nums ${latest.maxAgingDays > 180 ? 'text-red-600' : latest.maxAgingDays > 90 ? 'text-orange-500' : 'text-gray-900 dark:text-gray-100'}">${latest.maxAgingDays}d</div>
+            <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">${snapshots.length} data points</div>
         </div>
     </div>
 
     <!-- Charts -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">Outstanding Balance Over Time</p>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">Outstanding Balance Over Time</p>
             <canvas id="balanceChart_${safeId}" height="130"></canvas>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Invoice Count vs Balance</p>
-            <p class="text-[10px] text-gray-400 mb-4">Rising invoices + stable/falling balance = good for approval</p>
+        <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">Invoice Count vs Balance</p>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mb-4">Rising invoices + stable/falling balance = good for approval</p>
             <canvas id="countChart_${safeId}" height="130"></canvas>
         </div>
     </div>
@@ -130,35 +130,35 @@
 
     <!-- History Table -->
     ${snapshots.length > 0 ? `
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Snapshot History</p>
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-[var(--surface-secondary)]">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Snapshot History</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100 text-sm">
-                <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                <thead class="bg-gray-50 dark:bg-[var(--surface-tertiary)]">
                     <tr>
-                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Date</th>
-                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Outstanding</th>
-                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Invoices</th>
-                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Max Aging</th>
-                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Change</th>
-                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">% Change</th>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Date</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Outstanding</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Invoices</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Max Aging</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Change</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">% Change</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
                     ${snapshots.slice().reverse().map(function(s, i, arr) {
                         var prev = arr[i + 1];
                         var chg = prev ? (s.totalAmount - prev.totalAmount) : null;
                         var pctChg = (chg !== null && prev && prev.totalAmount) ? (chg / prev.totalAmount * 100) : null;
                         var chgStr = chg === null ? '—' : (chg >= 0 ? '+' + fmt.format(chg) : fmt.format(chg));
                         var pctStr = pctChg === null ? '—' : (pctChg >= 0 ? '+' + pctChg.toFixed(1) + '%' : pctChg.toFixed(1) + '%');
-                        var chgColor = chg === null ? '#9ca3af' : chg > 0 ? '#ef4444' : '#10b981';
-                        var agingColor = s.maxAgingDays > 180 ? '#dc2626' : s.maxAgingDays > 90 ? '#f97316' : '#374151';
-                        return '<tr style="border-bottom:1px solid #f9fafb">'
-                            + '<td class="px-5 py-3 font-medium text-gray-700">' + fmtDate(s.snapshotDate) + '</td>'
-                            + '<td class="px-5 py-3 text-right font-bold text-gray-900 tabular-nums">' + fmt.format(s.totalAmount) + '</td>'
-                            + '<td class="px-5 py-3 text-right text-gray-500 tabular-nums">' + s.invoiceCount + '</td>'
+                        var chgColor = chg === null ? 'var(--text-muted)' : chg > 0 ? '#ef4444' : '#10b981';
+                        var agingColor = s.maxAgingDays > 180 ? '#dc2626' : s.maxAgingDays > 90 ? '#f97316' : 'var(--text-secondary)';
+                        return '<tr style="border-bottom:1px solid var(--border-subtle)">'
+                            + '<td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-300">' + fmtDate(s.snapshotDate) + '</td>'
+                            + '<td class="px-5 py-3 text-right font-bold text-gray-900 dark:text-gray-100 tabular-nums">' + fmt.format(s.totalAmount) + '</td>'
+                            + '<td class="px-5 py-3 text-right text-gray-500 dark:text-gray-400 tabular-nums">' + s.invoiceCount + '</td>'
                             + '<td class="px-5 py-3 text-right font-semibold tabular-nums" style="color:' + agingColor + '">' + s.maxAgingDays + 'd</td>'
                             + '<td class="px-5 py-3 text-right font-semibold tabular-nums" style="color:' + chgColor + '">' + chgStr + '</td>'
                             + '<td class="px-5 py-3 text-right font-semibold tabular-nums" style="color:' + chgColor + '">' + pctStr + '</td>'
@@ -172,30 +172,30 @@
 
     <!-- Current Invoices List -->
     ${(currentInvoices && currentInvoices.length > 0) ? `
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Active Invoices</p>
-            <span class="text-xs text-gray-400">${currentInvoices.length} invoices · ${fmt.format(currentTotal)}</span>
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-[var(--surface-secondary)] flex items-center justify-between">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Active Invoices</p>
+            <span class="text-xs text-gray-400 dark:text-gray-500">${currentInvoices.length} invoices · ${fmt.format(currentTotal)}</span>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100 text-sm">
-                <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                <thead class="bg-gray-50 dark:bg-[var(--surface-tertiary)]">
                     <tr>
-                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Invoice No</th>
-                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Invoice Date</th>
-                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Due Date</th>
-                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Amount</th>
-                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Aging</th>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Invoice No</th>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Invoice Date</th>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Due Date</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Amount</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Aging</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
                     ${currentInvoices.map(function(inv) {
-                        var agingColor = inv.agingDays > 120 ? '#dc2626' : inv.agingDays > 90 ? '#ea580c' : inv.agingDays > 60 ? '#d97706' : inv.agingDays > 30 ? '#2563eb' : '#374151';
-                        return '<tr style="border-bottom:1px solid #f9fafb">'
-                            + '<td class="px-5 py-2.5 font-mono text-xs text-gray-600">' + (inv.invoiceNo || '—') + '</td>'
-                            + '<td class="px-5 py-2.5 text-xs text-gray-500">' + fmtDate(inv.invoiceDate) + '</td>'
-                            + '<td class="px-5 py-2.5 text-xs text-gray-500">' + fmtDate(inv.dueDate) + '</td>'
-                            + '<td class="px-5 py-2.5 text-right font-bold text-gray-900 tabular-nums text-xs">' + fmt.format(inv.balanceAmount) + '</td>'
+                        var agingColor = inv.agingDays > 120 ? '#dc2626' : inv.agingDays > 90 ? '#ea580c' : inv.agingDays > 60 ? '#d97706' : inv.agingDays > 30 ? '#2563eb' : 'var(--text-secondary)';
+                        return '<tr style="border-bottom:1px solid var(--border-subtle)">'
+                            + '<td class="px-5 py-2.5 font-mono text-xs text-gray-600 dark:text-gray-400">' + (inv.invoiceNo || '—') + '</td>'
+                            + '<td class="px-5 py-2.5 text-xs text-gray-500 dark:text-gray-400">' + fmtDate(inv.invoiceDate) + '</td>'
+                            + '<td class="px-5 py-2.5 text-xs text-gray-500 dark:text-gray-400">' + fmtDate(inv.dueDate) + '</td>'
+                            + '<td class="px-5 py-2.5 text-right font-bold text-gray-900 dark:text-gray-100 tabular-nums text-xs">' + fmt.format(inv.balanceAmount) + '</td>'
                             + '<td class="px-5 py-2.5 text-right font-bold tabular-nums text-xs" style="color:' + agingColor + '">' + inv.agingDays + 'd</td>'
                             + '</tr>';
                     }).join('')}
@@ -210,6 +210,11 @@
 ${hasData ? `
 <script>
 (function() {
+    var isDark = document.documentElement.classList.contains('dark');
+    var gridColor = isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6';
+    var tickColor = isDark ? '#9ca3af' : undefined;
+    var legendColor = isDark ? '#d1d5db' : undefined;
+
     var labels = ${JSON.stringify(labels)};
     var amounts = ${JSON.stringify(amounts)}.map(Number);
     var aging = ${JSON.stringify(agingArr)};
@@ -224,7 +229,7 @@ ${hasData ? `
                     label: 'Outstanding',
                     data: amounts,
                     borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99,102,241,0.07)',
+                    backgroundColor: isDark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.07)',
                     borderWidth: 2.5,
                     pointRadius: amounts.length > 30 ? 0 : 4,
                     pointHoverRadius: 6,
@@ -242,15 +247,15 @@ ${hasData ? `
                 },
                 scales: {
                     y: {
-                        ticks: { font: { size: 10 }, callback: function(v) {
+                        ticks: { font: { size: 10 }, color: tickColor, callback: function(v) {
                             if (v >= 10000000) return '₹' + (v/10000000).toFixed(1) + 'Cr';
                             if (v >= 100000)   return '₹' + (v/100000).toFixed(1) + 'L';
                             if (v >= 1000)     return '₹' + (v/1000).toFixed(1) + 'K';
                             return '₹' + v;
                         }},
-                        grid: { color: '#f3f4f6' }
+                        grid: { color: gridColor }
                     },
-                    x: { ticks: { font: { size: 10 }, maxRotation: 45 }, grid: { display: false } }
+                    x: { ticks: { font: { size: 10 }, color: tickColor, maxRotation: 45 }, grid: { display: false } }
                 }
             }
         });
@@ -267,7 +272,7 @@ ${hasData ? `
                     {
                         label: 'Invoice Count',
                         data: invoiceCounts,
-                        backgroundColor: 'rgba(99,102,241,0.15)',
+                        backgroundColor: isDark ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.15)',
                         borderColor: '#6366f1',
                         borderWidth: 1.5,
                         borderRadius: 4,
@@ -295,7 +300,7 @@ ${hasData ? `
                 responsive: true,
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { display: true, position: 'top', labels: { font: { size: 10 }, boxWidth: 12, padding: 8 } },
+                    legend: { display: true, position: 'top', labels: { font: { size: 10 }, color: legendColor, boxWidth: 12, padding: 8 } },
                     tooltip: { callbacks: {
                         label: function(ctx) {
                             if (ctx.dataset.label === 'Balance') return ' ₹' + ctx.raw.toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -306,13 +311,13 @@ ${hasData ? `
                 scales: {
                     yCount: {
                         type: 'linear', position: 'left',
-                        ticks: { font: { size: 10 }, stepSize: 1 },
-                        grid: { color: '#f3f4f6' },
+                        ticks: { font: { size: 10 }, color: tickColor, stepSize: 1 },
+                        grid: { color: gridColor },
                         title: { display: true, text: 'Invoices', font: { size: 9 }, color: '#6366f1' }
                     },
                     yBalance: {
                         type: 'linear', position: 'right',
-                        ticks: { font: { size: 10 }, callback: function(v) {
+                        ticks: { font: { size: 10 }, color: tickColor, callback: function(v) {
                             if (v >= 10000000) return '₹' + (v/10000000).toFixed(1) + 'Cr';
                             if (v >= 100000)   return '₹' + (v/100000).toFixed(1) + 'L';
                             if (v >= 1000)     return '₹' + (v/1000).toFixed(1) + 'K';
@@ -321,7 +326,7 @@ ${hasData ? `
                         grid: { display: false },
                         title: { display: true, text: 'Balance', font: { size: 9 }, color: '#f97316' }
                     },
-                    x: { ticks: { font: { size: 10 }, maxRotation: 45 }, grid: { display: false } }
+                    x: { ticks: { font: { size: 10 }, color: tickColor, maxRotation: 45 }, grid: { display: false } }
                 }
             }
         });

@@ -1,41 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+<script>
+(function(){
+    var t = localStorage.getItem('theme');
+    if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme:dark)').matches))
+        document.documentElement.classList.add('dark');
+})();
+</script>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error - Kosca AR System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <meta name="robots" content="noindex, nofollow">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
         }
     </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-gray-950">
     <div
-        class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 p-8 text-center space-y-6">
-        <div class="mx-auto w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
+        class="max-w-md w-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 p-8 text-center space-y-6">
+        <div class="mx-auto w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
                 </path>
             </svg>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
             <%= message || 'An error occurred' %>
         </h1>
-        <p class="text-gray-500">
+        <p class="text-gray-500 dark:text-gray-400">
             <%= details || 'Please try again or contact your administrator.' %>
         </p>
 
         <div class="pt-4 flex flex-col gap-3">
             <a href="javascript:history.back()"
-                class="w-full inline-flex justify-center items-center px-4 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                class="w-full inline-flex justify-center items-center px-4 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                 Go Back
             </a>
             <% if (locals.user) { %>

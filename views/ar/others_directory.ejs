@@ -1,21 +1,21 @@
 <%- include('../layout', { body: `<div class="space-y-5 w-full">
 
     <!-- Data Table Card -->
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+    <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col">
 
         <!-- Card Header -->
-        <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div class="flex items-center gap-2.5">
-                <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100">
+                <div class="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-100 dark:border-indigo-800">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                     </svg>
                 </div>
-                <h2 class="text-sm font-semibold text-gray-900">Other Institution Customers</h2>
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Other Institution Customers</h2>
             </div>
             <button hx-get="/ar/invoices?othersOnly=1" hx-target="#table-data" hx-include="[name='search'], [name='limit']"
-                class="inline-flex items-center gap-2 rounded-lg bg-white px-3.5 py-2 text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 self-start sm:self-auto">
-                <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-[var(--surface-secondary)] px-3.5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 self-start sm:self-auto">
+                <svg class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
                 Refresh
@@ -23,32 +23,32 @@
         </div>
 
         <!-- Search / Filter Controls -->
-        <div class="px-4 md:px-5 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-gray-100 bg-gray-50/50">
+        <div class="px-4 md:px-5 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-[var(--surface-secondary)]">
             <div class="relative w-full sm:w-72">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                     </svg>
                 </div>
                 <input type="text" name="search" id="search-input"
                     hx-get="/ar/invoices?othersOnly=1" hx-trigger="keyup changed delay:500ms, search"
                     hx-target="#table-data" hx-include="[name='limit']"
-                    class="block w-full rounded-lg border-0 py-2.5 pl-10 pr-4 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 bg-white"
+                    class="block w-full rounded-lg border-0 py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)]"
                     placeholder="Search customer or invoice...">
             </div>
-            <div class="flex items-center gap-2 text-sm text-gray-600 self-end sm:self-auto">
-                <label for="limit" class="hidden sm:inline font-medium text-gray-500 text-xs">Show:</label>
+            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 self-end sm:self-auto">
+                <label for="limit" class="hidden sm:inline font-medium text-gray-500 dark:text-gray-400 text-xs">Show:</label>
                 <div class="relative">
                     <select name="limit" id="limit"
                         hx-get="/ar/invoices?othersOnly=1" hx-trigger="change" hx-target="#table-data" hx-include="[name='search']"
-                        class="appearance-none rounded-lg border-0 py-2 pl-3 pr-8 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer font-medium">
+                        class="appearance-none rounded-lg border-0 py-2 pl-3 pr-8 text-sm text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)] cursor-pointer font-medium">
                         <option value="5">5 rows</option>
                         <option value="10" selected>10 rows</option>
                         <option value="25">25 rows</option>
                         <option value="50">50 rows</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
-                        <svg class="h-3.5 w-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -58,7 +58,7 @@
 
         <!-- HTMX Target -->
         <div id="table-data" class="bg-transparent" hx-get="/ar/invoices?othersOnly=1" hx-trigger="load">
-            <div class="py-16 flex flex-col justify-center items-center text-gray-400 space-y-3">
+            <div class="py-16 flex flex-col justify-center items-center text-gray-400 dark:text-gray-500 space-y-3">
                 <svg class="animate-spin w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
                     <path class="opacity-100" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
