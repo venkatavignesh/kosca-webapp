@@ -1,0 +1,326 @@
+<%- include('layout', { body: `<div class="space-y-0 w-full max-w-7xl mx-auto" x-data="{ tab: 0 }">
+    <h1 class="sr-only">AR Dashboard</h1>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 1 — CATEGORY TOTALS
+    ═══════════════════════════════════════ -->
+    <div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:0;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+        <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#111827;margin-bottom:10px;text-align:center">Category Overview</p>
+
+    <!-- Category Metrics -->
+    ${categoryMetrics ? (function() {
+        var visible = categoryMetrics.filter(function(cat) { return cat.metrics.total.raw > 0; });
+        if (!visible.length) return '';
+        var palette = [
+            { bg: '#dbeafe', label: '#1d4ed8', amount: '#312d63', sub: '#3b82f6' },
+            { bg: '#ede9fe', label: '#6d28d9', amount: '#3b0764', sub: '#8b5cf6' },
+            { bg: '#d1fae5', label: '#059669', amount: '#064e3b', sub: '#10b981' },
+            { bg: '#fce7f3', label: '#be185d', amount: '#831843', sub: '#ec4899' }
+        ];
+        var catPalette = [
+            { accent: '#22c55e', label: '#166534', amount: '#111827', sub: '#6b7280' },
+            { accent: '#f59e0b', label: '#92400e', amount: '#111827', sub: '#6b7280' },
+            { accent: '#a78bfa', label: '#5b21b6', amount: '#111827', sub: '#6b7280' },
+            { accent: '#64748b', label: '#334155', amount: '#111827', sub: '#6b7280' }
+        ];
+        function hexBg(hex, alpha) {
+            var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+            return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+        }
+        function card(href, accentColor, labelColor, labelText, amountText, doorsText) {
+            return '<a href="' + href + '" style="text-decoration:none;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:' + hexBg(accentColor, 0.08) + ';border:1px solid ' + accentColor + ';transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.12)\'" onmouseout="this.style.boxShadow=\'\'">'
+                + '<div style="height:3px;background:' + accentColor + '"></div>'
+                + '<div style="padding:10px 8px 12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center">'
+                + '<div style="font-size:clamp(9px,0.75vw,11px);font-weight:700;color:' + labelColor + ';text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;line-height:1.3">' + labelText + '</div>'
+                + '<div style="font-size:clamp(16px,1.6vw,21px);font-weight:800;color:' + '#111827' + ';font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1">' + amountText + '</div>'
+                + '<div style="font-size:clamp(10px,0.7vw,11px);color:#111827;margin-top:6px;font-weight:500">' + doorsText + '</div>'
+                + '</div>'
+                + '</a>';
+        }
+        var html = '<div class="cat-grid">';
+        if (recentMetrics && recentMetrics.total.raw > 0) {
+            html += card('/ar/directory', '#3b82f6', '#1d4ed8', 'Kosca Overall AR', recentMetrics.total.amount, recentMetrics.total.doors + ' doors');
+        }
+        visible.forEach(function(cat, i) {
+            var p = catPalette[i % catPalette.length];
+            html += card(cat.link, p.accent, p.label, cat.label, cat.metrics.total.amount, cat.metrics.total.doors + ' doors');
+        });
+        var dispTotal = disputedMetrics ? disputedMetrics.total.amount : '₹0';
+        var dispDoors = disputedMetrics ? disputedMetrics.total.doors : 0;
+        html += card('/ar/directory?disputed=1', '#ef4444', '#b91c1c', 'Disputed', dispTotal, dispDoors + ' doors');
+        if (typeof groupCount !== 'undefined' && groupCount > 0) {
+            html += '<a href="/ar/groups?tab=nonkey" style="text-decoration:none;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:rgba(139,92,246,0.08);border:1px solid #a78bfa;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.12)\'" onmouseout="this.style.boxShadow=\'\'">'
+                + '<div style="height:3px;background:#a78bfa"></div>'
+                + '<div style="padding:10px 8px 12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center">'
+                + '<div style="font-size:clamp(9px,0.75vw,11px);font-weight:700;color:#5b21b6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;line-height:1.3">Groups</div>'
+                + '<div style="font-size:clamp(16px,1.6vw,21px);font-weight:800;color:#111827;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1">' + groupCount + '</div>'
+                + '<div style="font-size:clamp(10px,0.7vw,11px);color:#111827;margin-top:6px;font-weight:500">customer groups</div>'
+                + '</div>'
+                + '</a>';
+        }
+        html += '</div>';
+        return html;
+    })() : ''}
+
+    </div>
+
+    <!-- Previous Month Category Overview -->
+    ${prevMonthCategories ? (function() {
+        var catPalette = [
+            { accent: '#22c55e', label: '#166534' },
+            { accent: '#f59e0b', label: '#92400e' },
+            { accent: '#a78bfa', label: '#5b21b6' },
+            { accent: '#64748b', label: '#334155' }
+        ];
+        function hexBg(hex, alpha) {
+            var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+            return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+        }
+        function card(accentColor, labelColor, labelText, amountText, doorsText) {
+            return '<div style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:' + hexBg(accentColor, 0.08) + ';border:1px solid ' + accentColor + '">'
+                + '<div style="height:3px;background:' + accentColor + '"></div>'
+                + '<div style="padding:10px 8px 12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center">'
+                + '<div style="font-size:clamp(9px,0.75vw,11px);font-weight:700;color:' + labelColor + ';text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;line-height:1.3">' + labelText + '</div>'
+                + '<div style="font-size:clamp(16px,1.6vw,21px);font-weight:800;color:#111827;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1">' + amountText + '</div>'
+                + '<div style="font-size:clamp(10px,0.7vw,11px);color:#111827;margin-top:6px;font-weight:500">' + doorsText + '</div>'
+                + '</div>'
+                + '</div>';
+        }
+        var html = '<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-top:10px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.04)">'
+            + '<p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#111827;margin-bottom:10px;text-align:center">AR data as of ' + prevMonthDateLabel + '</p>'
+            + '<div class="prevmonth-grid">';
+        if (prevMonthOverall && prevMonthOverall.total.raw > 0) {
+            html += card('#3b82f6', '#1d4ed8', 'Kosca Overall AR', prevMonthOverall.total.amount, prevMonthOverall.total.doors + ' doors');
+        }
+        prevMonthCategories.forEach(function(cat, i) {
+            if (cat.metrics.total.raw > 0) {
+                var p = catPalette[i % catPalette.length];
+                html += card(p.accent, p.label, cat.label, cat.metrics.total.amount, cat.metrics.total.doors + ' doors');
+            }
+        });
+        html += '</div></div>';
+        return html;
+    })() : ''}
+
+    <style>
+        .cat-grid, .prevmonth-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; align-items:stretch; }
+        .cat-grid > a, .prevmonth-grid > div { width:calc(50% - 5px); min-height:90px; }
+        @media(min-width:640px)  { .cat-grid > a, .prevmonth-grid > div { width:calc(33.333% - 7px); } }
+        @media(min-width:1024px) { .cat-grid > a, .prevmonth-grid > div { width:calc(20% - 8px); } }
+        @media(min-width:1280px) { .cat-grid > a, .prevmonth-grid > div { width:calc(16.666% - 9px); } }
+
+        .branch-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; align-items:stretch; }
+        .branch-grid > div { width:calc(50% - 5px); min-height:120px; display:flex; flex-direction:column; }
+        @media(max-width:399px)  { .branch-grid > div { width:100%; } }
+        @media(min-width:640px)  { .branch-grid > div { width:calc(33.333% - 7px); } }
+        @media(min-width:1024px) { .branch-grid > div { width:calc(20% - 8px); } }
+    </style>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 2 — LOCATION CARDS
+    ═══════════════════════════════════════ -->
+    <div style="background:#fff;border-radius:14px;padding:14px 16px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.04);margin-top:10px">
+        <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#111827;margin-bottom:10px;text-align:center">Branch Wise Breakdown</p>
+    <div class="branch-grid">
+        ${(function() {
+            function hexBg(hex, alpha) {
+                var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+                return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+            }
+            var displayName = { 'Visakhapatnam': 'Vizag' };
+            var palette = [
+                '#6366f1', '#22c55e', '#f59e0b', '#ec4899',
+                '#14b8a6', '#f97316', '#ef4444', '#a78bfa'
+            ];
+            function nameHash(str) {
+                var h = 0;
+                for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % palette.length;
+                return h;
+            }
+            var usedIdx = {};
+            var fmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+            var totalRaw = metrics.total.raw || 1;
+            var sorted = siteMetrics.slice().sort(function(a, b) {
+                var aOld = a.name.toLowerCase() === 'madurai_old';
+                var bOld = b.name.toLowerCase() === 'madurai_old';
+                if (aOld && !bOld) return 1;
+                if (!aOld && bOld) return -1;
+                return a.name.localeCompare(b.name);
+            });
+            // Assign unique palette colors based on name hash, resolve collisions
+            var colorMap = {};
+            sorted.forEach(function(s) {
+                var idx = nameHash(s.name);
+                var start = idx;
+                while (usedIdx[idx] && Object.keys(usedIdx).length < palette.length) {
+                    idx = (idx + 1) % palette.length;
+                    if (idx === start) break;
+                }
+                usedIdx[idx] = true;
+                colorMap[s.name] = idx;
+            });
+            return sorted.map(function(s, i) {
+                var accent = palette[colorMap[s.name] !== undefined ? colorMap[s.name] : i % palette.length];
+                var bd = s.breakdown || {};
+                var siteTotal = (bd.nonKey || 0) + (bd.key || 0) + (bd.sub || 0);
+                var tblCols = [
+                    { label: 'Key',     doors: bd.keyDoors    || 0, amt: bd.key    > 0 ? fmt.format(bd.key)    : null, filter: '&keyOnly=1' },
+                    { label: 'Sub D',   doors: bd.subDoors    || 0, amt: bd.sub    > 0 ? fmt.format(bd.sub)    : null, filter: '&subOnly=1' },
+                    { label: 'Non-Key', doors: bd.nonKeyDoors || 0, amt: bd.nonKey > 0 ? fmt.format(bd.nonKey) : null, filter: '' },
+                ];
+                var siteParam = encodeURIComponent(s.name);
+                var tbl = '';
+                tbl += '<div style="flex:1;display:flex;align-items:center;width:100%;padding:0 4px 4px"><table style="width:100%;border-collapse:collapse;border-top:1px solid #e2e8f0">'
+                    + '<thead><tr>'
+                    + '<th scope="col" style="padding:2px 4px;border-top:1px solid #e2e8f0;font-size:8px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;text-align:left"></th>'
+                    + '<th scope="col" style="padding:2px 4px;border-top:1px solid #e2e8f0;font-size:8px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;text-align:right">Amount</th>'
+                    + '<th scope="col" style="padding:2px 4px;border-top:1px solid #e2e8f0;font-size:8px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;text-align:right">Doors</th>'
+                    + '</tr></thead>'
+                    + '<tbody>'
+                    + tblCols.map(function(c, ci) {
+                        var empty = c.amt === null;
+                        var href = '/ar/directory?site=' + siteParam + c.filter;
+                        var rowAttr = empty ? '' : ' style="cursor:pointer" onclick="window.location.href=\'' + href + '\'" onmouseover="this.style.background=\'rgba(255,255,255,0.55)\'" onmouseout="this.style.background=\'transparent\'"';
+                        return '<tr' + (empty ? '' : rowAttr) + '>'
+                            + '<td style="padding:2px 4px;border-top:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap;vertical-align:middle">' + c.label + '</td>'
+                            + '<td style="padding:2px 4px;border-top:1px solid #e2e8f0;text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle;font-size:10px;font-weight:700;color:' + (empty ? '#cbd5e1' : '#111827') + '">' + (empty ? '—' : c.amt) + '</td>'
+                            + '<td style="padding:2px 4px;border-top:1px solid #e2e8f0;text-align:right;vertical-align:middle;font-size:9px;font-weight:500;color:' + (empty ? '#cbd5e1' : '#374151') + '">' + (empty ? '—' : c.doors) + '</td>'
+                            + '</tr>';
+                    }).join('')
+                    + '</tbody></table></div>';
+                return ''
+                    + '<div style="display:flex;flex-direction:column;border:1px solid ' + accent + ';border-radius:12px;overflow:hidden;background:' + hexBg(accent, 0.08) + ';transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.12)\'" onmouseout="this.style.boxShadow=\'\'">'
+                    + '<div style="height:3px;background:' + accent + '"></div>'
+                    + '<a href="/ar/directory?site=' + siteParam + '" style="text-decoration:none;display:flex;flex-direction:column;justify-content:center;padding:7px 8px 6px;text-align:center">'
+                    + '<div style="font-size:clamp(9px,0.7vw,10px);font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;line-height:1.3">' + (displayName[s.name] || s.name) + '</div>'
+                    + '<div style="font-size:clamp(16px,1.8vw,22px);font-weight:800;color:#111827;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1">' + fmt.format(siteTotal) + '</div>'
+                    + '</a>'
+                    + tbl
+                    + '</div>';
+            }).join('');
+        })()}
+    </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 3 — AGING TABLES
+    ═══════════════════════════════════════ -->
+    ${(function() {
+        var buckets = [
+            { key: 'bucket0_30',    label: '0\u201330d',    bKey: '0_30'    },
+            { key: 'bucket31_60',   label: '31\u201360d',   bKey: '31_60'   },
+            { key: 'bucket61_90',   label: '61\u201390d',   bKey: '61_90'   },
+            { key: 'bucket91_120',  label: '91\u2013120d',  bKey: '91_120'  },
+            { key: 'bucket121_150', label: '121\u2013150d', bKey: '121_150' },
+            { key: 'bucket151_180', label: '151\u2013180d', bKey: '151_180' },
+            { key: 'bucketOver180', label: '>180d',          bKey: 'over_180', critical: true }
+        ];
+        var bucketHeaderColors = {
+            'bucket0_30':    { bg: '#d1fae5', text: '#065f46' },
+            'bucket31_60':   { bg: '#dbeafe', text: '#312d63' },
+            'bucket61_90':   { bg: '#fef3c7', text: '#92400e' },
+            'bucket91_120':  { bg: '#ffedd5', text: '#9a3412' },
+            'bucket121_150': { bg: '#fee2e2', text: '#991b1b' },
+            'bucket151_180': { bg: '#ffe4e6', text: '#9f1239' },
+            'bucketOver180': { bg: '#fde68a', text: '#78350f' }
+        };
+        var col1Bg = '#f0eff9', col1Txt = '#312d63';
+        var lastBg = '#f0fdf4', lastTxt = '#065f46';
+        var botBg  = '#fafaf5', botTxt  = '#1e293b';
+        var displayName = { 'Visakhapatnam': 'Vizag' };
+        var C  = 'border:1px solid #94a3b8;';
+        var CS = C + 'position:sticky;left:0;z-index:2;box-shadow:2px 0 4px -1px rgba(0,0,0,0.08);';
+        var CH = C + 'position:sticky;left:0;z-index:3;box-shadow:2px 0 4px -1px rgba(0,0,0,0.08);';
+        var fs = 'font-size:clamp(11px,1vw,13px);';
+        var fh = 'font-size:clamp(9px,0.8vw,11px);';
+
+        function buildTable(siteData, totalData, catParam) {
+            var sortedSites = siteData.slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
+            var html = '<table style="border-collapse:collapse;width:100%;min-width:600px">';
+            html += '<thead><tr>';
+            html += '<th scope="col" style="background:#312d63;color:#fff;text-align:center;' + fh + 'font-weight:800;text-transform:uppercase;letter-spacing:0.07em;padding:7px 14px;min-width:80px;' + CH + '">Location</th>';
+            buckets.forEach(function(b) {
+                var hc = bucketHeaderColors[b.key] || { bg: '#312d63', text: '#fff' };
+                html += '<th scope="col" style="background:' + hc.bg + ';color:' + hc.text + ';text-align:center;' + fh + 'font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:7px;min-width:70px;' + C + '">' + b.label + '</th>';
+            });
+            html += '<th scope="col" style="background:#312d63;color:#fff;text-align:center;' + fh + 'font-weight:800;text-transform:uppercase;letter-spacing:0.07em;padding:7px;min-width:70px;' + C + '">Total</th>';
+            html += '</tr></thead><tbody>';
+            sortedSites.forEach(function(s) {
+                var siteName = displayName[s.name] || s.name;
+                html += '<tr style="background:#fff" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#fff\'">';
+                html += '<td style="background:' + col1Bg + ';padding:6px 14px 6px 18px;white-space:nowrap;' + fs + 'font-weight:700;color:' + col1Txt + ';' + CS + '">' + siteName + '</td>';
+                buckets.forEach(function(b) {
+                    var sep = catParam ? '&' : '?';
+                    var href = '/ar/directory?' + (catParam ? catParam + '&' : '') + 'site=' + encodeURIComponent(s.name) + '&bucket=' + b.bKey;
+                    var hasVal = s.metrics[b.key] && s.metrics[b.key].raw > 0;
+                    if (b.critical) {
+                        html += '<td style="background:' + (hasVal ? '#fde68a' : '#fffbeb') + ';padding:0;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;' + C + (hasVal ? 'cursor:pointer' : '') + '">';
+                        html += hasVal ? '<a href="' + href + '" style="display:block;padding:6px 12px;' + fs + 'color:#78350f;font-weight:700;text-decoration:none;transition:background 0.12s" onmouseover="this.style.background=\'#fcd34d\'" onmouseout="this.style.background=\'\'">' + s.metrics[b.key].amount + '</a>' : '<span style="display:block;padding:6px 12px;' + fs + 'color:#b45309;opacity:0.4">\u2014</span>';
+                    } else {
+                        html += '<td style="padding:0;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;' + C + (hasVal ? 'cursor:pointer' : '') + '">';
+                        html += hasVal ? '<a href="' + href + '" style="display:block;padding:6px 12px;' + fs + 'color:#334155;font-weight:600;text-decoration:none;transition:background 0.12s" onmouseover="this.style.background=\'#dddcf2\';this.style.color=\'#312d63\'" onmouseout="this.style.background=\'\';this.style.color=\'#334155\'">' + s.metrics[b.key].amount + '</a>' : '<span style="display:block;padding:6px 12px;' + fs + 'color:#cbd5e1">\u2014</span>';
+                    }
+                    html += '</td>';
+                });
+                var siteHref = '/ar/directory?' + (catParam ? catParam + '&' : '') + 'site=' + encodeURIComponent(s.name);
+                html += '<td style="padding:0;text-align:right;white-space:nowrap;cursor:pointer;' + C + '"><a href="' + siteHref + '" style="display:block;padding:6px 18px 6px 12px;background:' + lastBg + ';' + fs + 'font-weight:800;color:' + lastTxt + ';text-decoration:none;font-variant-numeric:tabular-nums;transition:background 0.12s" onmouseover="this.style.background=\'#bbf7d0\';this.style.color=\'#064e3b\'" onmouseout="this.style.background=\'' + lastBg + '\';this.style.color=\'' + lastTxt + '\'">' + s.metrics.total.amount + '</a></td>';
+                html += '</tr>';
+            });
+            // Total row
+            html += '<tr>';
+            html += '<td style="background:#dddcf2;padding:7px 14px 7px 18px;' + fs + 'font-weight:800;color:#312d63;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;' + CS + '">Total</td>';
+            buckets.forEach(function(b) {
+                var href = '/ar/directory?' + (catParam ? catParam + '&' : '') + 'bucket=' + b.bKey;
+                if (b.critical) {
+                    html += '<td style="padding:0;text-align:right;white-space:nowrap;cursor:pointer;' + C + '"><a href="' + href + '" style="display:block;padding:7px;background:#fcd34d;' + fs + 'font-weight:700;color:#78350f;text-decoration:none;font-variant-numeric:tabular-nums;transition:background 0.12s" onmouseover="this.style.background=\'#f59e0b\'" onmouseout="this.style.background=\'#fcd34d\'">' + totalData[b.key].amount + '</a></td>';
+                } else {
+                    html += '<td style="padding:0;text-align:right;white-space:nowrap;cursor:pointer;' + C + '"><a href="' + href + '" style="display:block;padding:7px;background:' + botBg + ';' + fs + 'font-weight:800;color:' + botTxt + ';text-decoration:none;font-variant-numeric:tabular-nums;transition:background 0.12s" onmouseover="this.style.background=\'#dddcf2\';this.style.color=\'#312d63\'" onmouseout="this.style.background=\'' + botBg + '\';this.style.color=\'' + botTxt + '\'">' + totalData[b.key].amount + '</a></td>';
+                }
+            });
+            var totalHref = '/ar/directory' + (catParam ? '?' + catParam : '');
+            html += '<td style="padding:0;text-align:right;white-space:nowrap;cursor:pointer;' + C + '"><a href="' + totalHref + '" style="display:block;padding:7px 18px 7px 12px;background:#bbf7d0;' + fs + 'font-weight:900;color:#064e3b;text-decoration:none;font-variant-numeric:tabular-nums;transition:background 0.12s" onmouseover="this.style.background=\'#86efac\'" onmouseout="this.style.background=\'#bbf7d0\'">' + totalData.total.amount + '</a></td>';
+            html += '</tr></tbody></table>';
+            return html;
+        }
+
+        function buildSection(xKey, title, siteData, totalData, catParam, defaultOpen) {
+            if (!siteData || !totalData) return '';
+            var chevron = '<svg x-bind:style="' + xKey + ' ? \'transform:rotate(180deg)\' : \'transform:rotate(0deg)\'" width="14" height="14" style="color:#4d47a8;transition:transform 0.2s;flex-shrink:0;display:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>';
+            return '<div x-data="{ ' + xKey + ': ' + (defaultOpen ? 'true' : 'false') + ' }" style="background:#fff;border-radius:12px;padding:10px clamp(12px,2vw,28px);border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.04);margin-top:10px">'
+                + '<button @click="' + xKey + ' = !' + xKey + '" style="width:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;background:none;border:none;cursor:pointer;padding:0;">'
+                + '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#111827">' + title + '</span>'
+                + chevron
+                + '</button>'
+                + '<div x-show="' + xKey + '" style="margin-top:16px;overflow-x:auto;-webkit-overflow-scrolling:touch">'
+                + buildTable(siteData, totalData, catParam)
+                + '</div></div>';
+        }
+
+        return buildSection('keyOpen',    'Key Accounts Aging Distribution by Location', keySiteMetrics, keyMetrics, 'keyOnly=1', false)
+             + buildSection('subOpen',    'Sub Distributors Aging Distribution by Location', subSiteMetrics, subMetrics, 'subOnly=1', false)
+             + buildSection('nonKeyOpen', 'Non-Key Aging Distribution by Location', siteMetrics, metrics, '', true);
+    })()}
+    <!-- end section 3 -->
+
+
+
+    <!-- Unknown site assignment panel — only shown when Unknown tab is active and admin -->
+    ${unknownTabIndex > 0 && unknownCustomers && unknownCustomers.length > 0 && user && user.role === 'ADMIN'
+        ? '<div x-show="tab === ' + unknownTabIndex + '" x-cloak class="space-y-3">'
+          + '<p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Assign Sites to Unknown Customers</p>'
+          + '<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">'
+          + '<div class="grid grid-cols-[1fr_200px_auto] items-center gap-x-4 px-5 py-2.5 border-b border-gray-100 bg-gray-50"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Customer</span><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assign Site</span><span></span></div>'
+          + unknownCustomers.map(function(c) {
+              return '<form method="POST" action="/admin/site-overrides" class="grid grid-cols-[1fr_200px_auto] items-center gap-x-4 px-5 py-3 border-b border-gray-50 hover:bg-gray-50/60 transition-colors">'
+                  + '<input type="hidden" name="customerCode" value="' + c.customerCode + '">'
+                  + '<div><div class="text-xs font-semibold text-gray-800">' + (c.customerName || 'Unknown') + '</div><div class="text-[11px] text-gray-400 font-mono mt-0.5">' + c.customerCode + '</div></div>'
+                  + '<div class="relative"><select name="siteName" required class="w-full appearance-none rounded-lg border-0 py-2 pl-3 pr-8 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer"><option value="" disabled selected>Select site...</option>'
+                  + siteNames.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join('')
+                  + '</select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5"><svg class="h-3.5 w-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div></div>'
+                  + '<button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors">Save</button>'
+                  + '</form>';
+          }).join('')
+          + '</div></div>'
+        : ''}
+
+</div>` }) %>

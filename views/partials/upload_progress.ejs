@@ -1,0 +1,84 @@
+<%
+  var isAR      = jobType !== 'customer_master';
+  var typeLabel = isAR ? 'AR Report' : 'Customer Master';
+  var steps     = ['Queue', 'Read', 'Parse', 'Clean', 'Save', 'Done'];
+  var done      = progress === 100;
+%>
+<div class="w-full mt-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+    id="ar-upload-progress" <% if (!done) { %>hx-get="/ar/upload/status" hx-trigger="every 2s" hx-swap="outerHTML"<% } %>>
+
+    <!-- Header -->
+    <div class="px-4 py-3 flex items-center justify-between" style="background: linear-gradient(to right, <%= done ? '#4d47a8, #3d3878' : '#4d47a8, #6b5fc4' %>)">
+        <div class="flex items-center gap-2">
+            <% if (!done) { %>
+            <svg class="w-4 h-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <% } else { %>
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+            <% } %>
+            <span class="text-sm font-bold text-white"><%= typeLabel %> Sync</span>
+        </div>
+        <span class="text-xs font-black text-white/90 tabular-nums"><%= progress %>%</span>
+    </div>
+
+    <div class="px-4 pt-3 pb-4 space-y-3">
+
+        <!-- Step indicators -->
+        <div class="flex items-center gap-0">
+            <% steps.forEach(function(s, i) {
+                var active   = i === step;
+                var complete = i < step;
+            %>
+            <% if (i > 0) { %>
+            <div class="flex-1 h-px <%= complete ? 'bg-indigo-400' : 'bg-gray-200' %> transition-colors duration-300"></div>
+            <% } %>
+            <div class="flex flex-col items-center gap-0.5">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold transition-all duration-300
+                    <%= complete ? 'bg-indigo-500 text-white' : active ? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-400' : 'bg-gray-100 text-gray-400' %>">
+                    <% if (complete) { %>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                    <% } else { %>
+                    <%= i + 1 %>
+                    <% } %>
+                </div>
+                <span class="text-[8px] font-medium <%= active ? 'text-indigo-600' : complete ? 'text-indigo-400' : 'text-gray-300' %> whitespace-nowrap"><%= s %></span>
+            </div>
+            <% }); %>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+            <div class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500 ease-out"
+                style="width: <%= progress %>%"></div>
+        </div>
+
+        <!-- Message -->
+        <p class="text-[11px] text-center font-medium <%= done ? 'text-indigo-600' : 'text-gray-500 animate-pulse' %>">
+            <%= message %>
+        </p>
+    </div>
+
+    <% if (done) { %>
+    <script>
+        (function() {
+            var key = 'uploadDoneReloaded';
+            if (!sessionStorage.getItem(key)) {
+                sessionStorage.setItem(key, '1');
+                setTimeout(function() { window.location.reload(); }, 1500);
+            } else {
+                sessionStorage.removeItem(key);
+                var el = document.getElementById('ar-upload-progress');
+                if (el) {
+                    el.style.transition = 'opacity 0.6s ease';
+                    el.style.opacity = '0';
+                    setTimeout(function() { el.remove(); }, 650);
+                }
+            }
+        })();
+    </script>
+    <% } %>
+</div>

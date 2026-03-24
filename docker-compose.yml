@@ -1,0 +1,90 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: kosca_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-kosca_ar}
+      TZ: Asia/Kolkata
+      PGTZ: Asia/Kolkata
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-kosca_ar}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: kosca_redis
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: ${DOCKER_TARGET:-dev}
+    container_name: kosca_web
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-kosca_ar}?schema=public
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+      - AR_REPORT_PATH=${AR_REPORT_PATH:-}
+      - CUSTOMER_MASTER_PATH=${CUSTOMER_MASTER_PATH:-}
+      - PENDING_SETTLEMENT_PATH=${PENDING_SETTLEMENT_PATH:-}
+      - TZ=Asia/Kolkata
+      - CI=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >
+      sh -c "pnpm prisma generate && pnpm prisma db push && pnpm run ${NPM_SCRIPT:-dev}"
+
+  worker:
+    build:
+      context: .
+      target: worker-${DOCKER_TARGET:-dev}
+    container_name: kosca_worker
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-kosca_ar}?schema=public
+      - REDIS_URL=redis://redis:6379
+      - AR_REPORT_PATH=${AR_REPORT_PATH:-}
+      - CUSTOMER_MASTER_PATH=${CUSTOMER_MASTER_PATH:-}
+      - PENDING_SETTLEMENT_PATH=${PENDING_SETTLEMENT_PATH:-}
+      - TZ=Asia/Kolkata
+      - CI=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./uploads:/app/uploads
+      - /home/koscait/Reports:/home/koscait/Reports:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >
+      sh -c "pnpm prisma generate && pnpm run worker:dev"
+
+volumes:
+  pgdata:

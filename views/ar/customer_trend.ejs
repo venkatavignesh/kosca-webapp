@@ -1,0 +1,331 @@
+<%
+    const fmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+    const safeId = customerCode.replace(/[^a-zA-Z0-9]/g, '_');
+    const hasData = snapshots.length >= 2;
+    const latest = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
+    const first  = snapshots.length > 0 ? snapshots[0] : null;
+    const delta  = (latest && first && latest !== first) ? (latest.totalAmount - first.totalAmount) : null;
+    const deltaFmt = delta !== null ? (delta >= 0 ? '+' + fmt.format(delta) : fmt.format(delta)) : null;
+    const deltaColor = delta === null ? '' : delta > 0 ? '#ef4444' : '#10b981';
+
+    // Risk status
+    let riskLabel = 'Insufficient Data', riskBg = '#f1f5f9', riskTxt = '#64748b', riskBorder = '#cbd5e1';
+    if (hasData && delta !== null) {
+        const pct = (delta / (first.totalAmount || 1)) * 100;
+        if (pct <= -5)      { riskLabel = 'Improving';  riskBg = '#f0fdf4'; riskTxt = '#15803d'; riskBorder = '#86efac'; }
+        else if (pct >= 10) { riskLabel = 'Worsening';  riskBg = '#fef2f2'; riskTxt = '#b91c1c'; riskBorder = '#fca5a5'; }
+        else                { riskLabel = 'Stable';     riskBg = '#fffbeb'; riskTxt = '#b45309'; riskBorder = '#fcd34d'; }
+    }
+
+    // Current invoices bucket breakdown
+    const buckets = [
+        { label: '0–30d',   min: 0,   max: 30,  color: '#3b82f6' },
+        { label: '31–60d',  min: 31,  max: 60,  color: '#f59e0b' },
+        { label: '61–90d',  min: 61,  max: 90,  color: '#f97316' },
+        { label: '91–120d', min: 91,  max: 120, color: '#ef4444' },
+        { label: '>120d',   min: 121, max: 9999,color: '#7f1d1d' }
+    ];
+    const bucketTotals = buckets.map(function(b) {
+        return (currentInvoices || []).filter(function(inv) {
+            return inv.agingDays >= b.min && inv.agingDays <= b.max;
+        }).reduce(function(sum, inv) { return sum + inv.balanceAmount; }, 0);
+    });
+    const currentTotal = (currentInvoices || []).reduce(function(s, i) { return s + i.balanceAmount; }, 0);
+
+    const labels   = snapshots.map(s => fmtDate(s.snapshotDate));
+    const amounts  = snapshots.map(s => s.totalAmount.toFixed(2));
+    const agingArr = snapshots.map(s => s.maxAgingDays);
+%>
+<%- include('../layout', { body: `<div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <a href="/ar/directory" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">← Directory</a>
+            </div>
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">${customerName}</h1>
+            <p class="mt-0.5 text-sm text-gray-500 font-mono">${customerCode}</p>
+        </div>
+        <div class="flex items-center gap-3 self-start sm:self-auto">
+            <span style="background:${riskBg};color:${riskTxt};border:1px solid ${riskBorder};border-radius:9999px;padding:4px 14px;font-size:12px;font-weight:700;letter-spacing:0.04em">${riskLabel}</span>
+            <span class="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Debt Trend</span>
+        </div>
+    </div>
+
+    <!-- Current Invoice Bucket Breakdown -->
+    ${(currentInvoices && currentInvoices.length > 0) ? `
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">Current Aging Breakdown</p>
+        <div class="flex gap-3 flex-wrap">
+            ${buckets.map(function(b, idx) {
+                var amt = bucketTotals[idx];
+                if (amt === 0) return '';
+                var pct = Math.round(amt / (currentTotal || 1) * 100);
+                return '<div style="flex:1;min-width:100px;background:#f8fafc;border:1px solid #e2e8f0;border-top:3px solid ' + b.color + ';border-radius:10px;padding:10px 12px">'
+                    + '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">' + b.label + '</div>'
+                    + '<div style="font-size:15px;font-weight:900;color:#1e293b;font-variant-numeric:tabular-nums">' + fmt.format(amt) + '</div>'
+                    + '<div style="font-size:10px;color:#94a3b8;margin-top:2px">' + pct + '% of total</div>'
+                    + '</div>';
+            }).join('')}
+        </div>
+        <!-- Balance bar -->
+        <div class="mt-4 flex rounded-full overflow-hidden h-2">
+            ${buckets.map(function(b, idx) {
+                var pct = Math.round(bucketTotals[idx] / (currentTotal || 1) * 100);
+                return pct > 0 ? '<div style="flex:' + pct + ';background:' + b.color + '" title="' + b.label + ': ' + pct + '%"></div>' : '';
+            }).join('')}
+        </div>
+    </div>
+    ` : ''}
+
+    ${!hasData ? `
+    <!-- No data banner -->
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-8 text-center">
+        <svg class="w-10 h-10 text-amber-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p class="text-sm font-semibold text-amber-800">No trend data yet</p>
+        <p class="text-xs text-amber-600 mt-1">Debt history accumulates with each AR report upload. At least two uploads on different days are needed to show a trend.</p>
+        ${snapshots.length === 1 ? '<p class="text-xs text-amber-500 mt-2 font-medium">1 snapshot recorded — upload again on a different day to see the trend.</p>' : ''}
+    </div>
+    ` : `
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Current Balance</div>
+            <div class="text-xl font-black text-gray-900 tabular-nums">${fmt.format(latest.totalAmount)}</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">${latest.invoiceCount} invoices</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">First Recorded</div>
+            <div class="text-xl font-black text-gray-900 tabular-nums">${fmt.format(first.totalAmount)}</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">${fmtDate(first && first.snapshotDate)}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Net Change</div>
+            <div class="text-xl font-black tabular-nums" style="color:${deltaColor}">${deltaFmt}</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">${delta !== null ? Math.abs(Math.round(delta / (first.totalAmount || 1) * 100)) + '% ' + (delta > 0 ? 'increase' : 'decrease') : 'since first record'}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Max Aging (Latest)</div>
+            <div class="text-xl font-black tabular-nums ${latest.maxAgingDays > 180 ? 'text-red-600' : latest.maxAgingDays > 90 ? 'text-orange-500' : 'text-gray-900'}">${latest.maxAgingDays}d</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">${snapshots.length} data points</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">Outstanding Balance Over Time</p>
+            <canvas id="balanceChart_${safeId}" height="130"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Invoice Count vs Balance</p>
+            <p class="text-[10px] text-gray-400 mb-4">Rising invoices + stable/falling balance = good for approval</p>
+            <canvas id="countChart_${safeId}" height="130"></canvas>
+        </div>
+    </div>
+    `}
+
+    <!-- History Table -->
+    ${snapshots.length > 0 ? `
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Snapshot History</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-100 text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Date</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Outstanding</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Invoices</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Max Aging</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Change</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">% Change</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    ${snapshots.slice().reverse().map(function(s, i, arr) {
+                        var prev = arr[i + 1];
+                        var chg = prev ? (s.totalAmount - prev.totalAmount) : null;
+                        var pctChg = (chg !== null && prev && prev.totalAmount) ? (chg / prev.totalAmount * 100) : null;
+                        var chgStr = chg === null ? '—' : (chg >= 0 ? '+' + fmt.format(chg) : fmt.format(chg));
+                        var pctStr = pctChg === null ? '—' : (pctChg >= 0 ? '+' + pctChg.toFixed(1) + '%' : pctChg.toFixed(1) + '%');
+                        var chgColor = chg === null ? '#9ca3af' : chg > 0 ? '#ef4444' : '#10b981';
+                        var agingColor = s.maxAgingDays > 180 ? '#dc2626' : s.maxAgingDays > 90 ? '#f97316' : '#374151';
+                        return '<tr style="border-bottom:1px solid #f9fafb">'
+                            + '<td class="px-5 py-3 font-medium text-gray-700">' + fmtDate(s.snapshotDate) + '</td>'
+                            + '<td class="px-5 py-3 text-right font-bold text-gray-900 tabular-nums">' + fmt.format(s.totalAmount) + '</td>'
+                            + '<td class="px-5 py-3 text-right text-gray-500 tabular-nums">' + s.invoiceCount + '</td>'
+                            + '<td class="px-5 py-3 text-right font-semibold tabular-nums" style="color:' + agingColor + '">' + s.maxAgingDays + 'd</td>'
+                            + '<td class="px-5 py-3 text-right font-semibold tabular-nums" style="color:' + chgColor + '">' + chgStr + '</td>'
+                            + '<td class="px-5 py-3 text-right font-semibold tabular-nums" style="color:' + chgColor + '">' + pctStr + '</td>'
+                            + '</tr>';
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    ` : ''}
+
+    <!-- Current Invoices List -->
+    ${(currentInvoices && currentInvoices.length > 0) ? `
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">Active Invoices</p>
+            <span class="text-xs text-gray-400">${currentInvoices.length} invoices · ${fmt.format(currentTotal)}</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-100 text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Invoice No</th>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Invoice Date</th>
+                        <th scope="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Due Date</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Amount</th>
+                        <th scope="col" class="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Aging</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    ${currentInvoices.map(function(inv) {
+                        var agingColor = inv.agingDays > 120 ? '#dc2626' : inv.agingDays > 90 ? '#ea580c' : inv.agingDays > 60 ? '#d97706' : inv.agingDays > 30 ? '#2563eb' : '#374151';
+                        return '<tr style="border-bottom:1px solid #f9fafb">'
+                            + '<td class="px-5 py-2.5 font-mono text-xs text-gray-600">' + (inv.invoiceNo || '—') + '</td>'
+                            + '<td class="px-5 py-2.5 text-xs text-gray-500">' + fmtDate(inv.invoiceDate) + '</td>'
+                            + '<td class="px-5 py-2.5 text-xs text-gray-500">' + fmtDate(inv.dueDate) + '</td>'
+                            + '<td class="px-5 py-2.5 text-right font-bold text-gray-900 tabular-nums text-xs">' + fmt.format(inv.balanceAmount) + '</td>'
+                            + '<td class="px-5 py-2.5 text-right font-bold tabular-nums text-xs" style="color:' + agingColor + '">' + inv.agingDays + 'd</td>'
+                            + '</tr>';
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    ` : ''}
+
+</div>
+
+${hasData ? `
+<script>
+(function() {
+    var labels = ${JSON.stringify(labels)};
+    var amounts = ${JSON.stringify(amounts)}.map(Number);
+    var aging = ${JSON.stringify(agingArr)};
+
+    var balanceCanvas = document.getElementById('balanceChart_${safeId}');
+    if (balanceCanvas && window.Chart) {
+        new Chart(balanceCanvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Outstanding',
+                    data: amounts,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99,102,241,0.07)',
+                    borderWidth: 2.5,
+                    pointRadius: amounts.length > 30 ? 0 : 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#6366f1',
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: function(ctx) { return ' ₹' + ctx.raw.toLocaleString('en-IN', { maximumFractionDigits: 0 }); } } }
+                },
+                scales: {
+                    y: {
+                        ticks: { font: { size: 10 }, callback: function(v) {
+                            if (v >= 10000000) return '₹' + (v/10000000).toFixed(1) + 'Cr';
+                            if (v >= 100000)   return '₹' + (v/100000).toFixed(1) + 'L';
+                            if (v >= 1000)     return '₹' + (v/1000).toFixed(1) + 'K';
+                            return '₹' + v;
+                        }},
+                        grid: { color: '#f3f4f6' }
+                    },
+                    x: { ticks: { font: { size: 10 }, maxRotation: 45 }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    var countCanvas = document.getElementById('countChart_${safeId}');
+    if (countCanvas && window.Chart) {
+        var invoiceCounts = ${JSON.stringify(snapshots.map(s => s.invoiceCount))};
+        new Chart(countCanvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Invoice Count',
+                        data: invoiceCounts,
+                        backgroundColor: 'rgba(99,102,241,0.15)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                        yAxisID: 'yCount',
+                        order: 2
+                    },
+                    {
+                        label: 'Balance',
+                        data: amounts,
+                        type: 'line',
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249,115,22,0.0)',
+                        borderWidth: 2.5,
+                        pointRadius: amounts.length > 30 ? 0 : 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#f97316',
+                        fill: false,
+                        tension: 0.35,
+                        yAxisID: 'yBalance',
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: true, position: 'top', labels: { font: { size: 10 }, boxWidth: 12, padding: 8 } },
+                    tooltip: { callbacks: {
+                        label: function(ctx) {
+                            if (ctx.dataset.label === 'Balance') return ' ₹' + ctx.raw.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+                            return ' ' + ctx.raw + ' invoices';
+                        }
+                    }}
+                },
+                scales: {
+                    yCount: {
+                        type: 'linear', position: 'left',
+                        ticks: { font: { size: 10 }, stepSize: 1 },
+                        grid: { color: '#f3f4f6' },
+                        title: { display: true, text: 'Invoices', font: { size: 9 }, color: '#6366f1' }
+                    },
+                    yBalance: {
+                        type: 'linear', position: 'right',
+                        ticks: { font: { size: 10 }, callback: function(v) {
+                            if (v >= 10000000) return '₹' + (v/10000000).toFixed(1) + 'Cr';
+                            if (v >= 100000)   return '₹' + (v/100000).toFixed(1) + 'L';
+                            if (v >= 1000)     return '₹' + (v/1000).toFixed(1) + 'K';
+                            return '₹' + v;
+                        }},
+                        grid: { display: false },
+                        title: { display: true, text: 'Balance', font: { size: 9 }, color: '#f97316' }
+                    },
+                    x: { ticks: { font: { size: 10 }, maxRotation: 45 }, grid: { display: false } }
+                }
+            }
+        });
+    }
+})();
+</script>
+` : ''}` }) %>

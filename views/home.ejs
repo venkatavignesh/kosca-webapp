@@ -1,0 +1,70 @@
+<%
+var arModules = locals.user && locals.user.modules ? locals.user.modules : [];
+var hasAR = arModules.some(function(m) { return ['ar_dashboard','ar_directory','ar_upload'].includes(m); });
+var arLink = arModules.includes('ar_dashboard') ? '/ar' : arModules.includes('ar_directory') ? '/ar/directory' : '/ar/upload';
+%>
+<%- include('layout', { body: `<div class="space-y-6">
+    <!-- Header Section -->
+    <div>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">KOSCA ERP</h1>
+        <p class="mt-2 text-base text-gray-500 max-w-2xl">Welcome to your centralized internal portal. Select a module
+            below to get started with your daily operations.</p>
+    </div>
+
+    <!-- Modules Grid -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+
+        <!-- AR Module Card -->
+        ${hasAR
+            ? '<a href="' + arLink + '" class="group relative bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:border-blue-500 hover:shadow-md transition-all duration-300"><div class="absolute top-0 right-0 p-4"><span class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">Online</span></div><div class="p-6"><div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors duration-300"><svg class="w-6 h-6 text-blue-600 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h3 class="text-xl font-bold text-gray-900 mb-2">Accounts Receivable</h3><p class="text-sm text-gray-500">Manage invoices, track aging accounts, and upload financial Excel reports.</p></div><div class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex items-center text-sm font-medium text-blue-600 group-hover:text-blue-700">Enter Module<svg class="ml-1.5 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div></a>'
+            : '<div class="relative bg-gray-50/50 rounded-2xl border border-gray-200 overflow-hidden cursor-not-allowed opacity-60"><div class="absolute top-0 right-0 p-4"><span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-500/20">No Access</span></div><div class="p-6"><div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h3 class="text-xl font-bold text-gray-900 mb-2">Accounts Receivable</h3><p class="text-sm text-gray-500">Manage invoices, track aging accounts, and upload financial Excel reports.</p></div></div>'
+        }
+
+        <!-- HRMS Module Card (Coming Soon) -->
+        <div
+            class="relative bg-gray-50/50 rounded-2xl border border-gray-200 overflow-hidden cursor-not-allowed opacity-80">
+            <div class="absolute top-0 right-0 p-4">
+                <span
+                    class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-500/20">Coming
+                    Soon</span>
+            </div>
+            <div class="p-6">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">HRMS</h3>
+                <p class="text-sm text-gray-500">Human Resource Management System. Manage employees, payroll, and
+                    attendance.</p>
+            </div>
+        </div>
+
+        <!-- Operations Module Card (Coming Soon) -->
+        <div
+            class="relative bg-gray-50/50 rounded-2xl border border-gray-200 overflow-hidden cursor-not-allowed opacity-80">
+            <div class="absolute top-0 right-0 p-4">
+                <span
+                    class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-500/20">In
+                    Development</span>
+            </div>
+            <div class="p-6">
+                <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Operations</h3>
+                <p class="text-sm text-gray-500">Track internal logistics, project pipelines, and overarching
+                    operational metrics.</p>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+    ` }) %>

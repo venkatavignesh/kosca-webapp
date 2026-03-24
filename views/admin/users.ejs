@@ -1,0 +1,379 @@
+<%- include('../partials/layout_top') %>
+
+<%- include('../partials/subnav') %>
+
+    <main id="main-content" class="max-w-7xl mx-auto py-4 sm:py-6 px-4 lg:px-8">
+        <h1 class="sr-only">User Management</h1>
+
+        <div x-data class="space-y-6">
+
+            <div class="flex justify-end">
+                <button @click="$dispatch('open-modal', 'create-user-modal')"
+                    class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add User
+                </button>
+            </div>
+
+            <!-- Users Data Table -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <!-- Card Header -->
+                <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 flex items-center">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        </div>
+                        <h2 class="text-sm font-semibold text-gray-900">Users</h2>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="py-2.5 pl-6 pr-3 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    Name</th>
+                                <th scope="col"
+                                    class="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    Email</th>
+                                <th scope="col"
+                                    class="px-4 py-2.5 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    Role</th>
+                                <th scope="col"
+                                    class="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                    Module Access</th>
+                                <th scope="col"
+                                    class="px-4 py-2.5 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider sm:pr-6">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            <% users.forEach(function(u) { %>
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="whitespace-nowrap py-2.5 pl-6 pr-3 text-sm font-bold text-gray-900">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="h-8 w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300 flex items-center justify-center text-gray-600 font-bold text-xs shadow-sm">
+                                                <%= u.name.charAt(0).toUpperCase() %>
+                                            </div>
+                                            <%= u.name %>
+                                                <% if (u.id===user.id) { %>
+                                                    <span
+                                                        class="inline-flex items-center rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">You</span>
+                                                    <% } %>
+                                        </div>
+                                    </td>
+                                    <td class="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-gray-500">
+                                        <%= u.email %>
+                                    </td>
+                                    <td class="whitespace-nowrap px-4 py-2.5 text-sm text-center">
+                                        <% var roleColor='bg-gray-50 text-gray-700 border-gray-200 ring-gray-500/10' ;
+                                            if (u.role==='ADMIN' ) {
+                                            roleColor='bg-purple-50 text-purple-700 border-purple-200 ring-purple-500/10'
+                                            ; } if (u.role==='MANAGER' ) {
+                                            roleColor='bg-blue-50 text-blue-700 border-blue-200 ring-blue-500/10' ; } %>
+                                            <span
+                                                class="inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-bold tracking-widest border shadow-sm ring-1 <%= roleColor %>">
+                                                <%= u.role %>
+                                            </span>
+                                    </td>
+                                    <td class="px-4 py-2.5 text-sm text-gray-500">
+                                        <div class="flex flex-wrap gap-1.5">
+                                            <% var allModules = [
+                                                { key: 'ar_dashboard',           label: 'Dashboard' },
+                                                { key: 'ar_directory',           label: 'Directory' },
+                                                { key: 'ar_key_accounts',        label: 'Key Accounts' },
+                                                { key: 'ar_sub_distributors',    label: 'Sub Distributors' },
+                                                { key: 'ar_upload',              label: 'Uploads' },
+                                                { key: 'ar_assign',              label: 'CO - Assign Door' },
+                                                { key: 'ar_groups',              label: 'Group Mgmt' },
+                                                { key: 'ar_comments',            label: 'Comments' },
+                                                { key: 'ar_pending_settlement',  label: 'Pending Settlement' },
+                                                { key: 'ar_mobile_edit',         label: 'Edit Mobile No.' },
+                                                { key: 'admin_site_assignments', label: 'Change Code Location' },
+                                                { key: 'admin_group_import',     label: 'Group Import' },
+                                                { key: 'admin_key_accounts',     label: 'Manage Key Accts' },
+                                                { key: 'admin_sub_distributors', label: 'Manage Sub D' },
+                                            ]; %>
+                                            <% allModules.forEach(function(mod) { var assigned = u.modules && u.modules.includes(mod.key); %>
+                                                <span class="inline-flex items-center rounded-md px-2 py-1 text-[10px] font-semibold ring-1 ring-inset shadow-sm border <%= assigned ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20 border-indigo-100/50' : 'bg-gray-100 text-gray-400 ring-gray-200 border-gray-200 line-through' %>">
+                                                    <%= mod.label %>
+                                                </span>
+                                            <% }); %>
+                                        </div>
+                                    </td>
+                                    <td class="whitespace-nowrap px-4 py-2.5 text-sm text-center sm:pr-6">
+                                        <button @click="$dispatch('open-modal', 'edit-user-modal-<%= u.id %>')"
+                                            type="button"
+                                            class="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors mr-1"
+                                            title="Edit User">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                                            </svg>
+                                        </button>
+                                        <% if (u.id !==user.id) { %>
+                                            <form action="/admin/users/<%= u.id %>/delete" method="POST"
+                                                onsubmit="return confirm('Are you sure you want to delete this user?');"
+                                                class="inline">
+                                                <button type="submit"
+                                                    class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                    title="Delete User">
+                                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                        stroke-width="1.5" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                            <% } %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% if (users.length===0) { %>
+                                        <tr>
+                                            <td colspan="5" class="py-12 text-center text-sm text-gray-500">No users
+                                                found.</td>
+                                        </tr>
+                                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Create User Modal -->
+    <div x-data="{ open: false }" @open-modal.window="if ($event.detail === 'create-user-modal') open = true"
+        class="relative z-50">
+        <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-gray-900/50 transition-opacity" style="display: none;"></div>
+        <div x-show="open" class="fixed inset-0 z-10 w-screen overflow-y-auto" style="display: none;">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="open" @click.away="open = false" x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100">
+                    <form action="/admin/users" method="POST" class="p-8">
+                        <div class="flex items-center justify-between mb-8">
+                            <div>
+                                <h3 class="text-xl font-bold leading-6 text-gray-900">Add New User</h3>
+                                <p class="mt-1 text-sm text-gray-500">Assign roles and dashboard modules.</p>
+                            </div>
+                            <button type="button" @click="open = false"
+                                class="rounded-full bg-gray-100 p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-200 transition-colors focus:outline-none">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="space-y-5">
+                            <div class="grid grid-cols-2 gap-5">
+                                <div class="col-span-2">
+                                    <label for="name" class="block text-sm font-semibold text-gray-700">Full
+                                        Name</label>
+                                    <input type="text" name="name" id="name" required
+                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                </div>
+                                <div class="col-span-2">
+                                    <label for="email" class="block text-sm font-semibold text-gray-700">Email
+                                        Address</label>
+                                    <input type="email" name="email" id="email" required
+                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                </div>
+                                <div class="col-span-2 sm:col-span-1">
+                                    <label for="password"
+                                        class="block text-sm font-semibold text-gray-700">Password</label>
+                                    <input type="password" name="password" id="password" required
+                                        class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                </div>
+                                <div class="col-span-2 sm:col-span-1">
+                                    <label for="role" class="block text-sm font-semibold text-gray-700">System
+                                        Role</label>
+                                    <select id="role" name="role"
+                                        class="mt-2 block w-full rounded-xl border-0 py-3 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 cursor-pointer font-medium hover:ring-gray-400 transition-colors">
+                                        <option value="USER">Standard User</option>
+                                        <option value="MANAGER">Manager</option>
+                                        <option value="ADMIN">Administrator</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-gray-100">
+                                <label class="block text-sm font-bold text-gray-900 mb-3">Module Assignments</label>
+                                <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                                    <% var createModules = [
+                                        { key: 'ar_dashboard',           label: 'Dashboard',            desc: 'AR metrics overview' },
+                                        { key: 'ar_directory',           label: 'Directory',            desc: 'Customer invoice list' },
+                                        { key: 'ar_key_accounts',        label: 'Key Accounts',         desc: 'Key account directory' },
+                                        { key: 'ar_sub_distributors',    label: 'Sub Distributors',     desc: 'Sub distributor directory' },
+                                        { key: 'ar_upload',              label: 'Upload',               desc: 'Upload AR Excel files' },
+                                        { key: 'ar_assign',              label: 'CO - Assign Door',     desc: 'Assign customers to COs' },
+                                        { key: 'ar_groups',              label: 'Group Management',     desc: 'Create/manage customer groups' },
+                                        { key: 'ar_comments',            label: 'Collection Notes',     desc: 'Comment on accounts' },
+                                        { key: 'ar_pending_settlement',  label: 'Pending Settlement',   desc: 'View pending settlement records' },
+                                        { key: 'ar_mobile_edit',         label: 'Edit Mobile No.',      desc: 'Edit customer phone numbers' },
+                                        { key: 'admin_site_assignments', label: 'Change Code Location',    desc: 'Move customers between sites' },
+                                        { key: 'admin_group_import',     label: 'Group Import',             desc: 'Bulk import customer groups' },
+                                        { key: 'admin_key_accounts',     label: 'Manage Key Accounts',      desc: 'Add/remove key accounts' },
+                                        { key: 'admin_sub_distributors', label: 'Manage Sub Distributors',  desc: 'Add/remove sub distributors' },
+                                    ]; %>
+                                    <% createModules.forEach(function(mod) { %>
+                                    <div class="relative flex items-start group">
+                                        <div class="flex h-5 items-center mt-0.5">
+                                            <input id="mod_<%= mod.key %>" name="modules" value="<%= mod.key %>" type="checkbox"
+                                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer">
+                                        </div>
+                                        <div class="ml-2.5 text-sm leading-6">
+                                            <label for="mod_<%= mod.key %>" class="font-medium text-gray-900 cursor-pointer text-xs"><%= mod.label %></label>
+                                            <p class="text-gray-400 text-[10px]"><%= mod.desc %></p>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 sm:flex sm:flex-row-reverse sm:gap-3">
+                            <button type="submit"
+                                class="inline-flex w-full justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 transition-all sm:w-auto">Create
+                                User</button>
+                            <button type="button" @click="open = false"
+                                class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all sm:mt-0 sm:w-auto">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modals (one per user) -->
+    <% users.forEach(function(u) { %>
+        <div x-data="{ open: false }"
+            @open-modal.window="if ($event.detail === 'edit-user-modal-<%= u.id %>') open = true" class="relative z-50">
+            <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-gray-900/50 transition-opacity" style="display: none;"></div>
+            <div x-show="open" class="fixed inset-0 z-10 w-screen overflow-y-auto" style="display: none;">
+                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div x-show="open" @click.away="open = false" x-transition:enter="ease-out duration-300"
+                        x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                        x-transition:leave="ease-in duration-200"
+                        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                        x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                        class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100">
+                        <form action="/admin/users/<%= u.id %>/edit" method="POST" class="p-8">
+                            <div class="flex items-center justify-between mb-8">
+                                <div>
+                                    <h3 class="text-xl font-bold leading-6 text-gray-900">Edit User</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Update credentials and permissions for
+                                        <strong>
+                                            <%= u.name %>
+                                        </strong>.
+                                    </p>
+                                </div>
+                                <button type="button" @click="open = false"
+                                    class="rounded-full bg-gray-100 p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-200 transition-colors focus:outline-none">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="space-y-5">
+                                <div class="grid grid-cols-2 gap-5">
+                                    <div class="col-span-2">
+                                        <label for="name-<%= u.id %>"
+                                            class="block text-sm font-semibold text-gray-700">Full Name</label>
+                                        <input type="text" name="name" id="name-<%= u.id %>" value="<%= u.name %>"
+                                            required
+                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label for="email-<%= u.id %>"
+                                            class="block text-sm font-semibold text-gray-700">Email Address</label>
+                                        <input type="email" name="email" id="email-<%= u.id %>" value="<%= u.email %>"
+                                            required
+                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                    </div>
+                                    <div class="col-span-2 sm:col-span-1">
+                                        <label for="password-<%= u.id %>"
+                                            class="block text-sm font-semibold text-gray-700">New Password</label>
+                                        <input type="password" name="password" id="password-<%= u.id %>"
+                                            placeholder="Leave blank to keep"
+                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                    </div>
+                                    <div class="col-span-2 sm:col-span-1">
+                                        <label for="role-<%= u.id %>"
+                                            class="block text-sm font-semibold text-gray-700">System Role</label>
+                                        <select id="role-<%= u.id %>" name="role"
+                                            class="mt-2 block w-full rounded-xl border-0 py-3 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 cursor-pointer font-medium hover:ring-gray-400 transition-colors">
+                                            <option value="USER" <%=u.role==='USER' ? 'selected' : '' %>>Standard User
+                                            </option>
+                                            <option value="MANAGER" <%=u.role==='MANAGER' ? 'selected' : '' %>>Manager
+                                            </option>
+                                            <option value="ADMIN" <%=u.role==='ADMIN' ? 'selected' : '' %>>Administrator
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100">
+                                    <label class="block text-sm font-bold text-gray-900 mb-3">Module Assignments</label>
+                                    <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                                        <% var editModules = [
+                                            { key: 'ar_dashboard',           label: 'Dashboard',            desc: 'AR metrics overview' },
+                                            { key: 'ar_directory',           label: 'Directory',            desc: 'Customer invoice list' },
+                                            { key: 'ar_key_accounts',        label: 'Key Accounts',         desc: 'Key account directory' },
+                                            { key: 'ar_sub_distributors',    label: 'Sub Distributors',     desc: 'Sub distributor directory' },
+                                            { key: 'ar_upload',              label: 'Upload',               desc: 'Upload AR Excel files' },
+                                            { key: 'ar_assign',              label: 'CO - Assign Door',     desc: 'Assign customers to COs' },
+                                            { key: 'ar_groups',              label: 'Group Management',     desc: 'Create/manage customer groups' },
+                                            { key: 'ar_comments',            label: 'Collection Notes',     desc: 'Comment on accounts' },
+                                            { key: 'ar_pending_settlement',  label: 'Pending Settlement',   desc: 'View pending settlement records' },
+                                            { key: 'ar_mobile_edit',         label: 'Edit Mobile No.',      desc: 'Edit customer phone numbers' },
+                                            { key: 'admin_site_assignments', label: 'Change Code Location',    desc: 'Move customers between sites' },
+                                            { key: 'admin_group_import',     label: 'Group Import',             desc: 'Bulk import customer groups' },
+                                            { key: 'admin_key_accounts',     label: 'Manage Key Accounts',      desc: 'Add/remove key accounts' },
+                                            { key: 'admin_sub_distributors', label: 'Manage Sub Distributors',  desc: 'Add/remove sub distributors' },
+                                            ]; %>
+                                        <% editModules.forEach(function(mod) { %>
+                                        <div class="relative flex items-start group">
+                                            <div class="flex h-5 items-center mt-0.5">
+                                                <input id="mod_<%= mod.key %>_<%= u.id %>" name="modules" value="<%= mod.key %>" type="checkbox"
+                                                    <%= u.modules.includes(mod.key) ? 'checked' : '' %>
+                                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer">
+                                            </div>
+                                            <div class="ml-2.5 text-sm leading-6">
+                                                <label for="mod_<%= mod.key %>_<%= u.id %>" class="font-medium text-gray-900 cursor-pointer text-xs"><%= mod.label %></label>
+                                                <p class="text-gray-400 text-[10px]"><%= mod.desc %></p>
+                                            </div>
+                                        </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-8 sm:flex sm:flex-row-reverse sm:gap-3">
+                                <button type="submit"
+                                    class="inline-flex w-full justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 transition-all sm:w-auto">Save
+                                    Changes</button>
+                                <button type="button" @click="open = false"
+                                    class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all sm:mt-0 sm:w-auto">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% }); %>
+
+<%- include('../partials/layout_bottom') %>

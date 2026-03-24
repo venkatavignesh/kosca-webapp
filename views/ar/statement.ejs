@@ -1,0 +1,332 @@
+<%- include('../partials/layout_top') %>
+
+
+<div style="background:#f0eff9;min-height:calc(100vh - 48px)">
+<main id="main-content" class="max-w-4xl mx-auto py-4 sm:py-6 px-4 lg:px-8">
+    <h1 class="sr-only">Statement — <%= customerName %></h1>
+    <div class="space-y-4">
+
+        <!-- Page header -->
+        <div class="flex items-center gap-2.5">
+            <button type="button" onclick="history.back()" class="p-1.5 rounded-lg hover:bg-white/60 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div class="flex-1 min-w-0">
+                <span class="text-sm font-bold text-gray-900 truncate"><%= customerName %></span>
+                <span class="ml-2 text-xs text-gray-400 font-mono"><%= customerCode %></span>
+            </div>
+            <div class="no-print flex items-center gap-2 flex-shrink-0">
+                <button onclick="printStatement(this)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed" style="background:#4d47a8" onmouseover="if(!this.disabled)this.style.background='#3d3878'" onmouseout="if(!this.disabled)this.style.background='#4d47a8'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    Print / Save PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Statement card -->
+        <div class="print-wrap bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+            <!-- Statement header band -->
+            <div class="px-6 sm:px-8 py-5 border-b border-gray-100">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Bill To</p>
+                        <p class="text-base font-bold text-gray-900"><%= customerName %></p>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5"><%= customerCode %></p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Date</p>
+                        <p class="text-sm font-semibold text-gray-700"><%= fmtDate(generatedAt) %></p>
+                        <p class="text-[10px] text-gray-400 mt-0.5">Outstanding Statement</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice table -->
+            <div class="px-4 sm:px-8 py-4 overflow-x-auto table-container">
+                <table class="w-full text-sm min-w-[560px]">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th scope="col" class="pb-2.5 text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider">Invoice No</th>
+                            <th scope="col" class="pb-2.5 text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="pb-2.5 text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider">Aging</th>
+                            <th scope="col" class="pb-2.5 text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider">Invoice Amt</th>
+                            <th scope="col" class="pb-2.5 text-center text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Paid</th>
+                            <th scope="col" class="pb-2.5 text-center text-[11px] font-bold text-gray-900 uppercase tracking-wider">Outstanding</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <%
+                            const fmt = new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR' });
+                            let grandInvoice = 0, grandPaid = 0, grandTotal = 0;
+                            invoices.forEach(function(inv) {
+                                var invAmt  = inv.invoiceAmount || inv.balanceAmount;
+                                var paidAmt = inv.paidAmount || 0;
+                                grandInvoice += invAmt;
+                                grandPaid    += paidAmt;
+                                grandTotal   += inv.balanceAmount;
+                                let agingClass = inv.agingDays > 90 ? 'text-red-600 font-bold' : inv.agingDays > 60 ? 'text-orange-500 font-semibold' : inv.agingDays > 30 ? 'text-amber-500' : 'text-gray-500';
+                        %>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-3 text-center font-mono text-gray-700 text-xs"><%= inv.invoiceNo %></td>
+                            <td class="py-3 text-center text-gray-500 text-xs"><%= fmtDate(inv.invoiceDate) %></td>
+                            <td class="py-3 text-center text-xs <%= agingClass %>"><%= inv.agingDays %> days</td>
+                            <td class="py-3 text-center text-gray-500 text-xs"><%= fmt.format(invAmt) %></td>
+                            <td class="py-3 text-center text-xs font-medium text-emerald-600"><%= fmt.format(paidAmt) %></td>
+                            <td class="py-3 text-center text-xs font-semibold text-gray-900"><%= fmt.format(inv.balanceAmount) %></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                    <tfoot>
+                        <tr class="border-t-2 border-gray-900">
+                            <td colspan="3" class="py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wide">Total</td>
+                            <td class="py-4 text-center text-xs font-bold text-gray-500"><%= fmt.format(grandInvoice) %></td>
+                            <td class="py-4 text-center text-xs font-bold text-emerald-600"><%= fmt.format(grandPaid) %></td>
+                            <td class="py-4 text-center text-sm font-black text-gray-900"><%= fmt.format(grandTotal) %></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 sm:px-8 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-4">
+                <p class="text-[11px] text-gray-400">This is a computer-generated statement and does not require a signature.</p>
+                <p class="text-[11px] text-gray-400 flex-shrink-0">Kosca Distribution LLP &copy; <%= new Date().getFullYear() %></p>
+            </div>
+
+        </div>
+    </div>
+</main>
+</div>
+
+<script>
+// Invoice data embedded from server — used for PDF generation
+var _stmtData = {
+    customerName: <%- JSON.stringify(customerName) %>,
+    customerCode: <%- JSON.stringify(customerCode) %>,
+    generatedAt:  <%- JSON.stringify(fmtDate(generatedAt)) %>,
+    invoices: <%- JSON.stringify(invoices.map(function(inv) { return {
+        invoiceNo:     inv.invoiceNo,
+        invoiceDate:   fmtDate(inv.invoiceDate),
+        agingDays:     inv.agingDays,
+        invoiceAmount: inv.invoiceAmount || inv.balanceAmount,
+        paidAmount:    inv.paidAmount || 0,
+        balanceAmount: inv.balanceAmount
+    }; })) %>
+};
+
+function _loadImage(src) {
+    return new Promise(function(resolve, reject) {
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            resolve({ dataUrl: canvas.toDataURL('image/png'), w: img.naturalWidth, h: img.naturalHeight });
+        };
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+function _loadScript(src) {
+    return new Promise(function(resolve, reject) {
+        if (document.querySelector('script[src="' + src + '"]')) { resolve(); return; }
+        var s = document.createElement('script');
+        s.src = src; s.onload = resolve;
+        s.onerror = function() { reject(new Error('Failed to load: ' + src)); };
+        document.head.appendChild(s);
+    });
+}
+
+async function _buildPdf() {
+    await _loadScript('/jspdf.umd.min.js');
+    await _loadScript('/jspdf.plugin.autotable.min.js');
+    var logo = await _loadImage('/kosca-logo.png').catch(function() { return null; });
+
+    var d    = _stmtData;
+    var doc  = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    var pw   = doc.internal.pageSize.getWidth();
+    var _num = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    function fmt(n) { return 'Rs.' + _num.format(n); }
+    var GRAY  = [100, 100, 110];
+    var GREEN = [5, 150, 105];
+
+    // Thin accent bar
+    doc.setFillColor(30, 27, 75);
+    doc.rect(0, 0, pw, 3, 'F');
+
+    // Left: logo + company name
+    var logoH = 10, logoW = 10, textX = 14;
+    if (logo) {
+        logoW = (logo.w / logo.h) * logoH;
+        doc.addImage(logo.dataUrl, 'PNG', 14, 8, logoW, logoH);
+        textX = 14 + logoW + 3;
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(30, 27, 75);
+    doc.text('Kosca Distribution LLP', textX, 15);
+
+    // Right: statement label + date
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(...GRAY);
+    doc.text('OUTSTANDING STATEMENT', pw - 14, 11, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(20, 20, 30);
+    doc.text(d.generatedAt, pw - 14, 18, { align: 'right' });
+
+    // Divider
+    doc.setDrawColor(220, 220, 230);
+    doc.setLineWidth(0.3);
+    doc.line(14, 24, pw - 14, 24);
+
+    // Bill To
+    doc.setFontSize(7);
+    doc.setTextColor(...GRAY);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BILL TO', 14, 30);
+    doc.setFontSize(11);
+    doc.setTextColor(20, 20, 30);
+    doc.setFont('helvetica', 'bold');
+    doc.text(d.customerName, 14, 37);
+    doc.setFontSize(8);
+    doc.setFont('courier', 'normal');
+    doc.setTextColor(...GRAY);
+    doc.text(d.customerCode, 14, 43);
+
+    // Table rows
+    var grandInv = 0, grandPaid = 0, grandBal = 0;
+    var rows = d.invoices.map(function(inv) {
+        grandInv  += inv.invoiceAmount;
+        grandPaid += inv.paidAmount;
+        grandBal  += inv.balanceAmount;
+        return [inv.invoiceNo, inv.invoiceDate, inv.agingDays + ' days',
+                fmt(inv.invoiceAmount), fmt(inv.paidAmount), fmt(inv.balanceAmount)];
+    });
+
+    doc.autoTable({
+        startY: 50,
+        head: [['Invoice No', 'Date', 'Aging', 'Invoice Amt', 'Paid', 'Outstanding']],
+        body: rows,
+        foot: [[{ content: 'Total', colSpan: 3, styles: { halign: 'center' } }, fmt(grandInv), fmt(grandPaid), fmt(grandBal)]],
+        showFoot: 'lastPage',
+        headStyles: { fillColor: [240, 239, 249], textColor: GRAY, fontStyle: 'bold', fontSize: 7 },
+        bodyStyles: { fontSize: 7.5, textColor: [50, 50, 60] },
+        footStyles: {
+            fillColor: [255, 255, 255], textColor: [20, 20, 30],
+            fontStyle: 'bold', fontSize: 7.5,
+            lineWidth: { top: 0.4 }, lineColor: [20, 20, 30]
+        },
+        columnStyles: {
+            0: { font: 'courier', cellWidth: 34 },
+            1: { cellWidth: 24 },
+            2: { halign: 'center', cellWidth: 20 },
+            3: { halign: 'center', cellWidth: 36 },
+            4: { halign: 'center', cellWidth: 34, textColor: GREEN },
+            5: { halign: 'center', cellWidth: 34, fontStyle: 'bold' }
+        },
+        didParseCell: function(data) {
+            if (data.section === 'head') {
+                data.cell.styles.halign = 'center';
+            }
+            if ((data.section === 'body' || data.section === 'foot') && [3,4,5].includes(data.column.index)) {
+                data.cell.styles.halign = 'center';
+            }
+            if (data.section === 'body' && data.column.index === 2) {
+                var days = d.invoices[data.row.index] && d.invoices[data.row.index].agingDays;
+                if      (days > 90) data.cell.styles.textColor = [220, 38, 38];
+                else if (days > 60) data.cell.styles.textColor = [234, 88, 12];
+                else if (days > 30) data.cell.styles.textColor = [217, 119, 6];
+            }
+            if (data.section === 'foot' && data.column.index === 4) {
+                data.cell.styles.textColor = GREEN;
+            }
+        },
+        margin: { left: 14, right: 14 },
+        alternateRowStyles: { fillColor: [250, 250, 252] }
+    });
+
+    // Footer note
+    var finalY = doc.lastAutoTable.finalY + 8;
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...GRAY);
+    doc.text('This is a computer-generated statement and does not require a signature.', 14, finalY);
+    doc.text('Kosca Distribution LLP \u00A9 ' + new Date().getFullYear(), pw - 14, finalY, { align: 'right' });
+
+    // Watermark — rendered on oversized canvas to prevent corner clipping
+    var ph      = doc.internal.pageSize.getHeight();
+    var scale   = 1.5;   // 50% larger than page on each side
+    var wmW     = Math.round(1240 * scale);
+    var wmH     = Math.round(1754 * scale);
+    var wmCanvas = document.createElement('canvas');
+    wmCanvas.width  = wmW;
+    wmCanvas.height = wmH;
+    var wmCtx  = wmCanvas.getContext('2d');
+    var wmDiag = Math.sqrt(wmW * wmW + wmH * wmH);
+    wmCtx.translate(wmW / 2, wmH / 2);
+    wmCtx.rotate(-Math.atan2(wmH, wmW));
+    wmCtx.font = 'bold 200px Arial';
+    // Scale text to span full diagonal of the ORIGINAL page (not the padded canvas)
+    var pageDiag = Math.sqrt(1240 * 1240 + 1754 * 1754);
+    var wmFs = Math.round(200 * pageDiag * 0.70 / wmCtx.measureText('STATEMENT').width);
+    wmCtx.font = 'bold ' + wmFs + 'px Arial';
+    wmCtx.fillStyle = 'rgb(30,27,75)';
+    wmCtx.textAlign = 'center';
+    wmCtx.textBaseline = 'middle';
+    wmCtx.fillText('STATEMENT', 0, 0);
+    // Crop the centre page-sized region from the oversized canvas
+    var cropCanvas = document.createElement('canvas');
+    cropCanvas.width  = 1240;
+    cropCanvas.height = 1754;
+    cropCanvas.getContext('2d').drawImage(wmCanvas,
+        (wmW - 1240) / 2, (wmH - 1754) / 2, 1240, 1754,
+        0, 0, 1240, 1754);
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.06 }));
+    doc.addImage(cropCanvas.toDataURL('image/png'), 'PNG', 0, 0, pw, ph);
+    doc.restoreGraphicsState();
+
+    return doc;
+}
+
+async function printStatement(btn) {
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    btn.disabled = true;
+    var orig = btn.innerHTML;
+    btn.innerHTML = '<span>' + (isMobile ? 'Saving…' : 'Generating…') + '</span>';
+    try {
+        var doc      = await _buildPdf();
+        var blob     = doc.output('blob');
+        var fileName = 'Statement-' + _stmtData.customerCode + '.pdf';
+        if (isMobile) {
+            // Mobile — download directly (Save as PDF)
+            var url = URL.createObjectURL(blob);
+            var a   = document.createElement('a');
+            a.href = url; a.download = fileName; a.click();
+            URL.revokeObjectURL(url);
+        } else {
+            // Desktop — open in new tab with print dialog
+            doc.autoPrint();
+            var url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(function() { URL.revokeObjectURL(url); }, 30000);
+        }
+    } catch (err) {
+        console.error('Print/Save failed:', err);
+        alert('Could not generate PDF: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+    }
+}
+</script>
+
+<%- include('../partials/layout_bottom') %>

@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum InvoiceStatus {
+  ACTIVE
+  SETTLED
+}
+
+model Invoice {
+  id              String   @id @default(uuid())
+  distributorName String?
+  siteName        String?
+  invoiceNo       String?
+  customerCode    String?
+  customerName    String
+  invoiceDate   DateTime
+  dueDate       DateTime
+  invoiceAmount Float    @default(0)
+  paidAmount    Float    @default(0)
+  balanceAmount Float
+  agingDays     Int
+  status        InvoiceStatus @default(ACTIVE)
+  settledAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  @@unique([invoiceNo, customerCode])
+  @@index([customerName])
+  @@index([customerCode])
+  @@index([invoiceNo])
+  @@index([distributorName])
+  @@index([siteName])
+  @@index([status])
+  @@index([invoiceDate])
+  @@index([agingDays])
+  @@index([status, customerCode])
+  @@index([status, invoiceDate])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  USER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  modules   String[]
+  createdAt DateTime @default(now())
+
+  @@index([role])
+}
+
+model Comment {
+  id            String    @id @default(uuid())
+  customerCode  String
+  invoiceNo     String?
+  comment       String
+  followUpDate  DateTime?
+  isResolved    Boolean   @default(false)
+  
+  parentId      String?
+  parent        Comment?  @relation("ThreadReplies", fields: [parentId], references: [id])
+  replies       Comment[] @relation("ThreadReplies")
+  
+  createdBy     String
+  createdByName String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  @@index([customerCode])
+  @@index([invoiceNo])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+model CustomerMaster {
+  id             String   @id @default(uuid())
+  customerCode   String   @unique
+  customerName   String
+  mobileNo       String?
+  masterMobileNo String?
+  mobileNoLocked Boolean  @default(false)
+  phone          String?
+  city           String?
+  state          String?
+  area           String?
+  email          String?
+  psrName        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  @@index([customerCode])
+  @@index([psrName])
+}
+
+model CustomerAssignment {
+  id           String   @id @default(uuid())
+  customerCode String
+  userId       String
+  assignedBy   String
+  createdAt    DateTime @default(now())
+
+  @@unique([customerCode, userId])
+  @@index([userId])
+  @@index([customerCode])
+}
+
+model CustomerGroup {
+  id           String   @id @default(uuid())
+  groupName    String
+  customerCode String   @unique
+  customerName String?
+  addedBy      String
+  addedAt      DateTime @default(now())
+
+  @@index([groupName])
+  @@index([customerCode])
+}
+
+model CustomerSiteOverride {
+  id           String   @id @default(uuid())
+  customerCode String   @unique
+  siteName     String
+  setBy        String
+  setAt        DateTime @default(now())
+
+  @@index([customerCode])
+}
+
+model CustomerDispute {
+  id           String   @id @default(uuid())
+  customerCode String   @unique
+  customerName String?
+  reason       String?
+  addedBy      String
+  addedAt      DateTime @default(now())
+
+  @@index([customerCode])
+}
+
+model ARSnapshot {
+  id            String   @id @default(uuid())
+  customerCode  String
+  customerName  String
+  snapshotDate  DateTime
+  totalAmount   Float
+  invoiceCount  Int
+  maxAgingDays  Int
+  createdAt     DateTime @default(now())
+
+  @@unique([customerCode, snapshotDate])
+  @@index([customerCode])
+  @@index([snapshotDate])
+}
+
+model PendingSettlement {
+  id           String    @id @default(uuid())
+  siteName     String
+  customerCode String
+  customerName String?
+  documentDate DateTime?
+  documentNo   String
+  type         String?
+  amount       Float     @default(0)
+  createdAt    DateTime  @default(now())
+
+  @@index([customerCode])
+  @@index([documentDate])
+}

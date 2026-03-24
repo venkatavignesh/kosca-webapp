@@ -1,0 +1,246 @@
+<% const isOwner=c.createdBy===currentUserId || userRole==='ADMIN' || userRole==='MANAGER' ; %>
+    <% if (depth===0) { %>
+        <div x-data="{ showReply: false, editing: false }" class="relative py-3 group">
+            <div class="flex gap-3">
+                <!-- Timeline dot -->
+                <div class="relative z-10 flex-shrink-0">
+                    <div
+                        class="h-[30px] w-[30px] rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm border
+                <%= c.isResolved ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (c.followUpDate ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-gray-50 text-gray-500 border-gray-200') %>">
+                        <%= c.createdByName.charAt(0).toUpperCase() %>
+                    </div>
+                </div>
+
+                <!-- Comment body -->
+                <div class="flex-1 min-w-0 pt-0.5">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-bold text-gray-900">
+                            <%= c.createdByName %>
+                        </span>
+                        <span class="text-[10px] text-gray-400">
+                            <%= fmtDate(c.createdAt) %> at
+                                <%= c.createdAt.toLocaleTimeString('en-IN', { hour: '2-digit' , minute: '2-digit' ,
+                                    hour12: true, timeZone: 'Asia/Kolkata' }) %>
+                                    <% if (c.updatedAt && c.updatedAt.getTime()> c.createdAt.getTime() + 1000) { %>
+                                        <span class="italic text-gray-300 ml-1">(edited)</span>
+                                        <% } %>
+                        </span>
+                    </div>
+
+                    <!-- Display Comment -->
+                    <div x-show="!editing">
+                        <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-line">
+                            <%= c.comment.trim() %>
+                        </p>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <% if (isOwner) { %>
+                        <form x-show="editing" hx-put="/ar/comments/<%= c.id %>"
+                            hx-target="#comments-<%= customerCode.replace(/[^a-zA-Z0-9]/g, '_') %>"
+                            class="mt-2 flex flex-col gap-2" style="display: none;">
+                            <input type="hidden" name="customerCode" value="<%= customerCode %>">
+                            <textarea name="commentBody" rows="2" required
+                                class="block w-full rounded-lg border-0 py-1.5 px-3 text-xs text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500"><%= c.comment.trim() %></textarea>
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <label class="text-[10px] font-semibold text-gray-500 whitespace-nowrap flex items-center gap-1">
+                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        Follow-up
+                                    </label>
+                                    <input type="date" name="followUpDate"
+                                        value="<%= c.followUpDate ? c.followUpDate.toISOString().split('T')[0] : '' %>"
+                                        class="rounded border-0 py-1 px-2 text-[10px] text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="button" @click="editing = false"
+                                        class="text-[10px] text-gray-500 hover:text-gray-700 font-medium px-2 py-1">Cancel</button>
+                                    <button type="submit"
+                                        class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold shadow-sm transition-colors">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                        <% } %>
+
+                            <div class="mt-2 flex flex-wrap items-center gap-2">
+                                <% if (c.followUpDate) { %>
+                                    <div
+                                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-semibold border shadow-sm
+                        <%= c.isResolved ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200' %>">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <%= c.isResolved ? 'Resolved:' : 'Follow-up:' %>
+                                            <%= fmtDate(c.followUpDate) %>
+                                    </div>
+                                    <% } %>
+                                        <% if (c.invoiceNo) { %>
+                                            <span
+                                                class="inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-mono text-gray-500 border border-gray-200">INV:
+                                                <%= c.invoiceNo %>
+                                            </span>
+                                            <% } %>
+                            </div>
+
+                            <!-- Action Bar -->
+                            <div
+                                class="mt-2 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <% if (canPost) { %>
+                                    <button type="button" @click="showReply = !showReply"
+                                        class="text-[10px] font-bold text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-wider">Reply</button>
+                                    <% } %>
+                                        <% if (isOwner) { %>
+                                            <button type="button" @click="editing = !editing; showReply = false"
+                                                class="text-[10px] font-bold text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-wider">Edit</button>
+                                            <% } %>
+                                                <% if (c.followUpDate && !c.isResolved && canPost) { %>
+                                                    <button hx-post="/ar/comments/<%= c.id %>/resolve"
+                                                        hx-target="#comments-<%= customerCode.replace(/[^a-zA-Z0-9]/g, '_') %>"
+                                                        hx-vals='{"customerCode": "<%= customerCode %>"}'
+                                                        class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors uppercase tracking-wider">Mark
+                                                        Resolved</button>
+                                                    <% } %>
+                                                <% if (userRole === 'ADMIN') { %>
+                                                    <button
+                                                        hx-post="/ar/comments/<%= c.id %>/delete"
+                                                        hx-target="#comments-<%= customerCode.replace(/[^a-zA-Z0-9]/g, '_') %>"
+                                                        hx-vals='{"customerCode": "<%= customerCode %>"}'
+                                                        hx-swap="innerHTML"
+                                                        hx-confirm="Delete this comment and all its replies?"
+                                                        class="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-wider">Delete</button>
+                                                <% } %>
+                            </div>
+
+                            <!-- Reply Form -->
+                            <% if (canPost) { %>
+                                <form x-show="showReply" hx-post="/ar/comments"
+                                    hx-target="#comments-<%= customerCode.replace(/[^a-zA-Z0-9]/g, '_') %>"
+                                    class="mt-3 bg-gray-50 rounded-lg p-3 border border-gray-200 shadow-sm"
+                                    style="display: none;">
+                                    <input type="hidden" name="customerCode" value="<%= customerCode %>">
+                                    <input type="hidden" name="parentId" value="<%= c.id %>">
+                                    <textarea name="comment" rows="2" required placeholder="Write a reply..."
+                                        class="block w-full rounded-md border-0 py-1.5 px-3 text-xs text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-none"></textarea>
+                                    <div class="mt-2 flex justify-end gap-2">
+                                        <button type="button" @click="showReply = false"
+                                            class="text-[10px] text-gray-500 hover:text-gray-700 font-medium px-2 py-1">Cancel</button>
+                                        <button type="submit"
+                                            class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold shadow-sm transition-colors">Post
+                                            Reply</button>
+                                    </div>
+                                </form>
+                                <% } %>
+                </div>
+            </div>
+
+            <!-- REPLIES -->
+            <% if (c.replies && c.replies.length> 0) { %>
+                <div
+                    class="mt-3 ml-12 space-y-3 relative before:absolute before:left-[-15px] before:top-0 before:bottom-0 before:w-px before:bg-gray-200">
+                    <% c.replies.forEach(function(reply) { %>
+                        <%- include('comment_node', { c: reply, customerCode, canPost, currentUserId, userRole, depth:
+                            depth + 1 }) %>
+                            <% }); %>
+                </div>
+                <% } %>
+        </div>
+        <% } else { %>
+            <div x-data="{ showReply: false, editing: false }"
+                class="relative flex gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100 group before:absolute before:left-[-15px] before:top-5 before:w-[15px] before:h-px before:bg-gray-200">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-bold text-gray-900">
+                            <%= c.createdByName %>
+                        </span>
+                        <span class="text-[10px] text-gray-400">
+                            <%= fmtDate(c.createdAt) %> at
+                                <%= c.createdAt.toLocaleTimeString('en-IN', { hour: '2-digit' , minute: '2-digit' ,
+                                    hour12: true, timeZone: 'Asia/Kolkata' }) %>
+                                    <% if (c.updatedAt && c.updatedAt.getTime()> c.createdAt.getTime() + 1000) { %>
+                                        <span class="italic text-gray-300 ml-1">(edited)</span>
+                                        <% } %>
+                        </span>
+                    </div>
+
+                    <div x-show="!editing">
+                        <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-line">
+                            <%= c.comment.trim() %>
+                        </p>
+                    </div>
+
+                    <!-- Reply Edit Form -->
+                    <% if (isOwner) { %>
+                        <form x-show="editing" hx-put="/ar/comments/<%= c.id %>"
+                            hx-target="#comments-<%= customerCode.replace(/[^a-zA-Z0-9]/g, '_') %>"
+                            class="mt-2 flex flex-col gap-2" style="display: none;">
+                            <input type="hidden" name="customerCode" value="<%= customerCode %>">
+                            <textarea name="commentBody" rows="2" required
+                                class="block w-full rounded-lg border-0 py-1.5 px-3 text-xs text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500"><%= c.comment.trim() %></textarea>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" @click="editing = false"
+                                    class="text-[10px] text-gray-500 hover:text-gray-700 font-medium px-2 py-1">Cancel</button>
+                                <button type="submit"
+                                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold shadow-sm transition-colors">Save</button>
+                            </div>
+                        </form>
+                        <% } %>
+
+                            <!-- Action Bar -->
+                            <div
+                                class="mt-1 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <% if (canPost) { %>
+                                    <button type="button" @click="showReply = !showReply"
+                                        class="text-[10px] font-bold text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-wider">Reply</button>
+                                    <% } %>
+                                        <% if (isOwner) { %>
+                                            <button type="button" @click="editing = !editing; showReply = false"
+                                                class="text-[10px] font-bold text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-wider">Edit</button>
+                                            <% } %>
+                                        <% if (userRole === 'ADMIN') { %>
+                                            <button
+                                                hx-post="/ar/comments/<%= c.id %>/delete"
+                                                hx-target="#comments-<%= customerCode.replace(/[^a-zA-Z0-9]/g, '_') %>"
+                                                hx-vals='{"customerCode": "<%= customerCode %>"}'
+                                                hx-swap="innerHTML"
+                                                hx-confirm="Delete this reply?"
+                                                class="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-wider">Delete</button>
+                                        <% } %>
+                            </div>
+
+                            <!-- Reply Form for Sub-comments -->
+                            <% if (canPost) { %>
+                                <form x-show="showReply" hx-post="/ar/comments"
+                                    hx-target="#comments-<%= customerCode.replace(/[^a-zA-Z0-9]/g, '_') %>"
+                                    class="mt-3 bg-white rounded-lg p-3 border border-gray-200 shadow-sm"
+                                    style="display: none;">
+                                    <input type="hidden" name="customerCode" value="<%= customerCode %>">
+                                    <input type="hidden" name="parentId" value="<%= c.id %>">
+                                    <textarea name="comment" rows="2" required placeholder="Write a reply..."
+                                        class="block w-full rounded-md border-0 py-1.5 px-3 text-xs text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-none"></textarea>
+                                    <div class="mt-2 flex justify-end gap-2">
+                                        <button type="button" @click="showReply = false"
+                                            class="text-[10px] text-gray-500 hover:text-gray-700 font-medium px-2 py-1">Cancel</button>
+                                        <button type="submit"
+                                            class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-bold shadow-sm transition-colors">Post
+                                            Reply</button>
+                                    </div>
+                                </form>
+                                <% } %>
+
+                </div>
+            </div>
+
+            <!-- Recursive Replies for Sub-comments -->
+            <% if (c.replies && c.replies.length> 0) { %>
+                <div
+                    class="mt-3 ml-6 space-y-3 relative before:absolute before:left-[-15px] before:top-0 before:bottom-0 before:w-px before:bg-gray-200">
+                    <% c.replies.forEach(function(reply) { %>
+                        <%- include('comment_node', { c: reply, customerCode, canPost, currentUserId, userRole, depth:
+                            depth + 1 }) %>
+                            <% }); %>
+                </div>
+                <% } %>
+                    <% } %>

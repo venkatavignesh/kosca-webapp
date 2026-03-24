@@ -1,0 +1,339 @@
+<!-- Table data partial -->
+<%
+  var _detailParts = [];
+  if (typeof sites !== 'undefined' && sites.length) {
+      sites.forEach(function(s){ _detailParts.push('site=' + encodeURIComponent(s)); });
+  }
+  if (typeof bucket !== 'undefined' && bucket) {
+      _detailParts.push('bucket=' + encodeURIComponent(bucket));
+  }
+  var siteDetailQuery = _detailParts.length ? '?' + _detailParts.join('&') : '';
+  var activeGroup = (typeof group !== 'undefined' && group) ? group : '';
+%>
+<%
+  var activePsr = (typeof psrs !== 'undefined' && psrs.length === 1) ? psrs[0] : '';
+%>
+<div id="filter-state" style="display:none" data-group="<%= activeGroup %>" data-psr="<%= activePsr %>"></div>
+<% if (activePsr) { %><input type="hidden" name="psr_badge" value="<%= activePsr %>"><% } %>
+
+<!-- Count bar -->
+<div class="px-5 py-2 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
+    <span class="text-xs text-gray-500">
+        <span class="font-bold text-gray-800"><%= totalGroups %></span> customer<%= totalGroups !== 1 ? 's' : '' %><% if (search) { %> for "<%= search %>"<% } %>
+        <% if (activeGroup) { %>
+        <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 border border-violet-200">
+            <%= activeGroup %>
+            <button hx-get="/ar/invoices" hx-target="#table-data"
+                    hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge']"
+                    onclick="event.stopPropagation()"
+                    title="Clear group filter"
+                    class="ml-0.5 text-violet-400 hover:text-violet-700 leading-none">&times;</button>
+        </span>
+        <% } %>
+        <% if (activePsr) { %>
+        <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-green-100 text-green-700 border border-green-200">
+            <%= activePsr %>
+            <button hx-get="/ar/invoices" hx-target="#table-data"
+                    hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='group']"
+                    onclick="event.stopPropagation()" title="Clear BDE filter"
+                    class="ml-0.5 text-green-400 hover:text-green-700 leading-none">&times;</button>
+        </span>
+        <% } %>
+    </span>
+    <% if (totalGroups > 0) { %><span class="text-xs text-gray-400">Showing <%= (page-1)*limit+1 %>–<%= Math.min(page*limit, totalGroups) %></span><% } %>
+</div>
+
+<!-- Table -->
+<div class="overflow-x-hidden sm:overflow-x-auto">
+<% if (groups.length === 0) { %>
+    <div class="py-12 text-center">
+        <div class="flex flex-col items-center justify-center space-y-3">
+            <div class="p-3 bg-gray-50 rounded-full">
+                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            <span class="font-medium text-sm text-gray-600">No records found.</span>
+            <span class="text-xs text-gray-400">Upload an Excel file or refine your search parameters.</span>
+        </div>
+    </div>
+<% } else { %>
+<% const _hasCO = hasModule('ar_assign') && typeof officers !== 'undefined' && officers.length > 0; %>
+<style>
+    @media(max-width:639px) {
+        .col-cust, .col-grp, .col-bde, .col-inv { display:none !important; }
+        .dir-table { table-layout:auto !important; }
+        .dir-table colgroup { display:none; }
+        .dir-table td, .dir-table th { padding:4px 6px !important; }
+        .col-out { padding-left:2px !important; }
+    }
+</style>
+<table class="dir-table w-full border-collapse text-sm table-fixed">
+    <colgroup>
+        <col style="width:3%">
+        <col style="width:9%">
+        <col style="width:<%= _hasCO ? 28 : 33 %>%">
+        <col class="col-grp" style="width:12%">
+        <col style="width:8%">
+        <col style="width:<%= _hasCO ? 10 : 13 %>%">
+        <col style="width:<%= _hasCO ? 5 : 6 %>%">
+        <% if (_hasCO) { %><col style="width:11%"><% } %>
+        <col style="width:<%= _hasCO ? 12 : 13 %>%">
+    </colgroup>
+    <thead>
+        <tr class="border-b border-gray-200 bg-gray-50/80">
+            <th scope="col" class="w-8 px-3 py-2"></th>
+            <th scope="col" class="px-3 py-2 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Code</th>
+            <th scope="col" class="col-cust px-3 py-2 text-left text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Customer</th>
+            <th scope="col" class="col-grp px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Group</th>
+            <th scope="col" class="col-bde px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">BDE</th>
+            <th scope="col" class="col-out px-3 py-2 text-right text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Outstanding</th>
+            <th scope="col" class="col-inv px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Inv</th>
+            <% if (_hasCO) { %>
+            <th scope="col" class="px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">CO</th>
+            <% } %>
+            <th scope="col" class="px-3 py-2 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Max Aging</th>
+        </tr>
+    </thead>
+    <% var rowIdx = typeof rowIdx === 'undefined' ? 0 : rowIdx; %>
+    <% groups.forEach(function(g) {
+        rowIdx++;
+        const rowBase = rowIdx % 2 === 0 ? 'bg-gray-100' : 'bg-white';
+        const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+        const totalAmt    = g._sum.balanceAmount || 0;
+        const maxAging    = g._max.agingDays || 0;
+        const invoiceCount = g._count.id || 0;
+        const code  = g.customerCode || '-';
+        const safeId = code.replace(/[^a-zA-Z0-9]/g, '_');
+        let agingBadgeColor = 'bg-gray-100 text-gray-600 border-gray-200';
+        if      (maxAging > 90) agingBadgeColor = 'bg-red-50 text-red-700 border-red-200';
+        else if (maxAging > 60) agingBadgeColor = 'bg-orange-50 text-orange-700 border-orange-200';
+        else if (maxAging > 30) agingBadgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+        else if (maxAging >  0) agingBadgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
+        else                    agingBadgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        const colSpan = _hasCO ? 9 : 8;
+    %>
+    <tbody x-data="{ open: false, loaded: false }">
+        <!-- Main row -->
+        <tr class="border-b cursor-pointer select-none transition-colors hover:bg-indigo-50/30"
+            :class="open ? 'bg-indigo-50/40 !border-b-2 !border-indigo-200' : '<%= rowBase %> border-gray-100'"
+            @click="open = !open; if (open && !loaded) { loaded = true; htmx.ajax('GET', '/ar/invoices/<%= encodeURIComponent(code) %><%= siteDetailQuery %>', '#details-<%= safeId %>') }">
+
+            <!-- Expand chevron -->
+            <td class="px-3 py-2.5 w-8">
+                <div class="flex items-center justify-center text-gray-400 transition-colors"
+                     :class="open ? 'text-indigo-500' : ''">
+                    <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-90' : ''"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </td>
+
+            <!-- Code + phone icon -->
+            <td class="px-3 py-2.5 whitespace-nowrap" onclick="event.stopPropagation()">
+                <div x-data="{ open: false, mobile: '<%= (g.mobileNo || '').replace(/'/g, '') %>' }" class="flex items-center gap-1.5" @click.window="open = false">
+                    <template x-if="mobile">
+                        <a :href="'tel:' + mobile" class="text-red-400 hover:text-red-600 transition-colors flex-shrink-0" :title="mobile">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        </a>
+                    </template>
+                    <span class="text-xs text-gray-400 font-mono cursor-pointer hover:text-indigo-500 transition-colors"
+                          title="Click to copy"
+                          x-data="{ copied: false }"
+                          @click.stop="(function(t){ var el=document.createElement('textarea'); el.value=t; el.style.position='fixed'; el.style.opacity='0'; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); copied=true; setTimeout(function(){ copied=false; },1500); })('<%= code %>')"
+                          :class="copied ? '!text-emerald-500' : ''"
+                          x-text="copied ? 'Copied!' : '<%= code %>'"></span>
+                    <% if (hasModule('ar_mobile_edit')) { %>
+                    <div class="relative">
+                        <button @click.stop="open = !open"
+                                class="text-gray-300 hover:text-indigo-400 transition-colors flex-shrink-0" title="Edit phone number">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H9v-2a2 2 0 01.586-1.414z"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak @click.stop
+                             class="absolute z-50 left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[180px]" style="display:none">
+                            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Phone Number</p>
+                            <div class="flex items-center gap-1">
+                                <input type="text" x-ref="mobileInput" :value="mobile" placeholder="Enter mobile"
+                                       class="flex-1 text-[10px] border border-indigo-300 rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                                       @keydown.escape.stop="open = false"
+                                       @keydown.enter.stop="fetch('/ar/customers/<%= encodeURIComponent(code) %>/mobile', { method: 'PUT', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams({mobileNo: $refs.mobileInput.value}) }).then(() => { mobile = $refs.mobileInput.value.trim(); open = false; })"
+                                       x-init="$watch('open', v => v && $nextTick(() => $refs.mobileInput.focus()))">
+                                <button @click.stop="fetch('/ar/customers/<%= encodeURIComponent(code) %>/mobile', { method: 'PUT', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams({mobileNo: $refs.mobileInput.value}) }).then(() => { mobile = $refs.mobileInput.value.trim(); open = false; })"
+                                        class="text-emerald-500 hover:text-emerald-700 transition-colors flex-shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+            </td>
+
+            <!-- Customer name + disputed -->
+            <td class="col-cust px-3 py-2.5 max-w-xs">
+                <div class="flex items-center gap-1.5 overflow-hidden">
+                    <span class="text-sm font-semibold text-gray-900 truncate flex-1 min-w-0" title="<%= g.customerName || code %>"><%= g.customerName || code %></span>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        <% if (g.isDisputed) { %>
+                        <span class="inline-flex items-center rounded px-1 py-0.5 text-[8px] font-bold bg-orange-100 text-orange-700 border border-orange-200">⚠ DISPUTED</span>
+                        <% } %>
+                        <% if (g.hasPendingSettlement) { %>
+                        <span class="inline-flex items-center rounded px-1 py-0.5 text-[8px] font-bold bg-amber-50 text-amber-700 border border-amber-200">PS</span>
+                        <% } %>
+                    </div>
+                </div>
+            </td>
+
+            <!-- Group -->
+            <td class="col-grp px-3 py-2.5 text-center">
+                <% if (g.groupName) { %>
+                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-violet-50 text-violet-700 border border-violet-200 whitespace-nowrap cursor-pointer hover:bg-violet-100 transition-colors"
+                      hx-get="/ar/invoices?group=<%= encodeURIComponent(g.groupName) %>"
+                      hx-target="#table-data"
+                      hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge']"
+                      onclick="event.stopPropagation()"
+                      title="Filter by this group"><%= g.groupName %></span>
+                <% } else { %>
+                <span class="text-[10px] text-gray-300">—</span>
+                <% } %>
+            </td>
+
+            <!-- PSR -->
+            <td class="col-bde px-3 py-2.5 text-center">
+                <% if (g.psrName) { %>
+                <span class="inline-flex items-center rounded-md px-1.5 py-px text-[10px] font-medium leading-tight bg-green-50 text-green-700 border border-green-200 break-words cursor-pointer hover:bg-green-100 transition-colors"
+                      hx-get="/ar/invoices?psr=<%= encodeURIComponent(g.psrName) %>"
+                      hx-target="#table-data"
+                      hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='group']"
+                      onclick="event.stopPropagation(); document.querySelectorAll('[name=psr]').forEach(function(el){ el.checked=false; })"
+                      title="Filter by this BDE"><%= g.psrName %></span>
+                <% } else { %>
+                <span class="text-xs text-gray-300">—</span>
+                <% } %>
+            </td>
+
+
+            <!-- Outstanding amount -->
+            <td class="col-out px-3 py-2.5 text-right whitespace-nowrap">
+                <span class="text-sm font-bold text-gray-900"><%= formatter.format(totalAmt) %></span>
+            </td>
+
+            <!-- Invoice count -->
+            <td class="col-inv px-3 py-2.5 text-center whitespace-nowrap">
+                <span class="text-xs text-gray-400"><%= invoiceCount %></span>
+            </td>
+
+            <!-- CO assignment -->
+            <% if (_hasCO) { %>
+            <td class="px-3 py-2.5 text-center whitespace-nowrap" onclick="event.stopPropagation()">
+                <div x-data="{ open: false }" class="relative" @click.window="open = false">
+                    <div id="assign-badge-<%= safeId %>" class="flex justify-center gap-1 cursor-pointer" @click.stop="open = !open">
+                        <% if (g.assignedOfficerIds && g.assignedOfficerIds.length > 0) { %>
+                            <% g.assignedOfficerIds.forEach(function(oid) { const o = officers.find(f => f.id === oid); if (o) { %>
+                                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-teal-50 text-teal-700 ring-1 ring-teal-200"><%= o.name %></span>
+                            <% } }); %>
+                        <% } else { %>
+                            <span class="text-xs text-gray-400 italic">+ CO</span>
+                        <% } %>
+                    </div>
+                    <div x-show="open" x-cloak @click.stop
+                         class="absolute z-50 left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[140px]" style="display:none">
+                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">Toggle CO</p>
+                        <% officers.forEach(function(o) { %>
+                        <label class="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-gray-50 cursor-pointer group">
+                            <input type="checkbox"
+                                <%= g.assignedOfficerIds && g.assignedOfficerIds.includes(o.id) ? 'checked' : '' %>
+                                hx-post="/ar/assignments/toggle"
+                                hx-vals='{"customerCode": "<%= code %>", "userId": "<%= o.id %>"}'
+                                hx-target="#assign-badge-<%= safeId %>" hx-swap="innerHTML" hx-trigger="change"
+                                class="rounded text-teal-600 focus:ring-teal-500 w-3 h-3" @click.stop>
+                            <span class="text-[10px] text-gray-700 group-hover:text-gray-900"><%= o.name %></span>
+                        </label>
+                        <% }); %>
+                    </div>
+                </div>
+            </td>
+            <% } %>
+
+            <!-- Max aging -->
+            <td class="px-3 py-2.5 text-center whitespace-nowrap">
+                <div class="inline-flex items-center justify-center gap-3">
+                    <a href="/ar/customer/<%= encodeURIComponent(code) %>/trend" onclick="event.stopPropagation()" class="text-indigo-400 hover:text-indigo-600 transition-colors flex-shrink-0" title="View trend">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </a>
+                    <% if (maxAging > 0) { %>
+                    <span class="inline-flex items-center justify-center rounded-full border w-14 py-0.5 text-[10px] font-bold <%= agingBadgeColor %>"><%= maxAging %>d</span>
+                    <% } else { %>
+                    <span class="inline-flex items-center justify-center w-14 text-xs text-gray-300">—</span>
+                    <% } %>
+                </div>
+            </td>
+        </tr>
+
+        <!-- Expanded invoice details row -->
+        <tr x-show="open"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            x-cloak class="border-b-2 border-indigo-100">
+            <td colspan="<%= colSpan %>" class="p-0 px-1 sm:px-[20px] pb-2 sm:pb-[20px]">
+                <div class="border-l-2 sm:border-l-4 border-indigo-300 bg-slate-50/60 rounded-b-lg overflow-hidden">
+                    <div id="details-<%= safeId %>">
+                        <div class="py-8 flex flex-col justify-center items-center text-gray-400 space-y-3">
+                            <svg class="animate-spin w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                                <path class="opacity-100" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span class="animate-pulse text-sm font-medium">Loading invoices...</span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+    <% }); %>
+</table>
+<% } %>
+</div>
+
+<!-- Pagination Controls -->
+<% var keyOnlyParam    = (typeof keyOnly    !== 'undefined' && keyOnly)    ? '&keyOnly=1'    : ''; %>
+<% var subOnlyParam    = (typeof subOnly    !== 'undefined' && subOnly)    ? '&subOnly=1'    : ''; %>
+<% var psOnlyParam     = (typeof psOnly     !== 'undefined' && psOnly)     ? '&ps_only=1'    : ''; %>
+<% var bucketParam = (typeof bucket !== 'undefined' && bucket) ? '&bucket=' + bucket : ''; %>
+<% var siteParam = ''; if (typeof sites !== 'undefined' && sites.length) { sites.forEach(function(s){ siteParam += '&site=' + encodeURIComponent(s); }); } %>
+<% var extraParams = keyOnlyParam + subOnlyParam + psOnlyParam + bucketParam + siteParam; %>
+<% if (totalPages > 1) { %>
+    <div class="px-4 py-3 border-t border-gray-100 flex flex-col items-center gap-2">
+        <p class="text-sm text-gray-500 whitespace-nowrap">Page <span class="font-semibold text-gray-800"><%= page %></span> of <span class="font-semibold text-gray-800"><%= totalPages %></span></p>
+        <div class="flex items-center gap-1">
+            <button hx-get="/ar/invoices?page=<%= Math.max(1, page-1) %><%= extraParams %>" hx-target="#table-data"
+                hx-include="[name='search'], [name='limit'], [name='sort'], [name='psr'], [name='psr_badge'], [name='group']"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors <%= page === 1 ? 'opacity-40 cursor-not-allowed' : '' %>"
+                <%= page === 1 ? 'disabled' : '' %>>Previous</button>
+            <%
+               var mStart = Math.max(1, page-1);
+               var mEnd   = Math.min(totalPages, mStart+2);
+               mStart = Math.max(1, mEnd-2);
+               var dStart = Math.max(1, page-2);
+               var dEnd   = Math.min(totalPages, dStart+4);
+               dStart = Math.max(1, dEnd-4);
+            %>
+            <% for (var p = dStart; p <= dEnd; p++) {
+                   var inMobile = (p >= mStart && p <= mEnd);
+            %>
+                <button hx-get="/ar/invoices?page=<%= p %><%= extraParams %>" hx-target="#table-data"
+                    hx-include="[name='search'], [name='limit'], [name='sort'], [name='psr'], [name='psr_badge'], [name='group']"
+                    class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors <%= p === page ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-200 text-gray-600 hover:bg-gray-50' %> <%= inMobile ? '' : 'hidden sm:inline-flex' %>"><%= p %></button>
+            <% } %>
+            <button hx-get="/ar/invoices?page=<%= Math.min(totalPages, page+1) %><%= extraParams %>" hx-target="#table-data"
+                hx-include="[name='search'], [name='limit'], [name='sort'], [name='psr'], [name='psr_badge'], [name='group']"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors <%= page === totalPages ? 'opacity-40 cursor-not-allowed' : '' %>"
+                <%= page === totalPages ? 'disabled' : '' %>>Next</button>
+        </div>
+    </div>
+<% } %>

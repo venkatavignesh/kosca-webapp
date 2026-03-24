@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Kosca Distribution LLP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="robots" content="noindex, nofollow">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-slate-50 font-sans antialiased px-4">
+
+    <div class="max-w-sm w-full">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-indigo-600 shadow-lg mb-4">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Kosca Distribution LLP</h2>
+            <p class="mt-1 text-sm text-gray-500">Sign in to your workspace</p>
+        </div>
+
+        <!-- Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Accent line -->
+            <div class="h-0.5 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
+
+            <div class="p-8">
+                <% if (error) { %>
+                    <div id="login-error" role="alert" class="mb-5 bg-red-50 text-red-700 text-sm font-medium px-4 py-3 rounded-lg border border-red-100 flex items-start gap-2">
+                        <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <form class="space-y-5" action="/login" method="POST">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                </svg>
+                            </div>
+                            <input id="email" name="email" type="email" autocomplete="email" required
+                                class="block w-full pl-10 pr-4 py-2.5 text-sm text-gray-900 bg-white ring-1 ring-inset ring-gray-200 rounded-lg border-0 focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
+                                placeholder="you@kosca.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <input id="password" name="password" type="password" autocomplete="current-password" required
+                                class="block w-full pl-10 pr-4 py-2.5 text-sm text-gray-900 bg-white ring-1 ring-inset ring-gray-200 rounded-lg border-0 focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div class="pt-1">
+                        <button type="submit"
+                            class="w-full flex justify-center items-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors shadow-sm">
+                            Sign in
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <p class="mt-6 text-center text-xs text-gray-400">&copy; 2026 Kosca Internals. All rights reserved.</p>
+    </div>
+
+</body>
+
+</html>

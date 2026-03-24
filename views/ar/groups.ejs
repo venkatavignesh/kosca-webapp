@@ -1,0 +1,55 @@
+<%- include('../layout', { body: `<div class="space-y-5 w-full">
+    <h1 class="sr-only">Customer Groups</h1>
+
+    <!-- Main card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col" x-data="{ tab: '${defaultTab}' }">
+
+        <!-- Card Header -->
+        <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2.5">
+            <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            </div>
+            <h2 class="text-sm font-semibold text-gray-900">Customer Groups</h2>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="flex justify-center border-b border-gray-100 bg-gray-50/30 px-2">
+            <button @click="tab='key'; history.replaceState(null,'','/ar/groups?tab=key')"
+                hx-get="/ar/groups-data?tab=key" hx-target="#groups-data" hx-indicator="#groups-spinner"
+                :class="tab==='key' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Key</button>
+            <button @click="tab='sub'; history.replaceState(null,'','/ar/groups?tab=sub')"
+                hx-get="/ar/groups-data?tab=sub" hx-target="#groups-data" hx-indicator="#groups-spinner"
+                :class="tab==='sub' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Sub D</button>
+            <button @click="tab='nonkey'; history.replaceState(null,'','/ar/groups?tab=nonkey')"
+                hx-get="/ar/groups-data?tab=nonkey" hx-target="#groups-data" hx-indicator="#groups-spinner"
+                :class="tab==='nonkey' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Non-Key</button>
+            <button @click="tab='ungrouped'; history.replaceState(null,'','/ar/groups?tab=ungrouped')"
+                hx-get="/ar/groups-data?tab=ungrouped" hx-target="#groups-data" hx-indicator="#groups-spinner"
+                :class="tab==='ungrouped' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Ungrouped</button>
+            <svg id="groups-spinner" class="htmx-indicator animate-spin w-3.5 h-3.5 text-indigo-400 self-center ml-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+        </div>
+
+        <!-- HTMX target — loads default tab -->
+        <div id="groups-data"
+            hx-get="/ar/groups-data?tab=${defaultTab}"
+            hx-trigger="load"
+            hx-indicator="#groups-spinner">
+            <div class="py-16 flex flex-col justify-center items-center text-gray-400 space-y-3">
+                <svg class="animate-spin w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                    <path class="opacity-100" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span class="text-sm font-medium">Loading groups...</span>
+            </div>
+        </div>
+
+    </div>
+
+</div>` }) %>

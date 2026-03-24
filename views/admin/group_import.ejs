@@ -1,0 +1,86 @@
+<%- include('../partials/layout_top') %>
+
+<%- include('../partials/subnav') %>
+
+    <main id="main-content" class="max-w-7xl mx-auto py-4 sm:py-6 px-4 lg:px-8">
+        <h1 class="sr-only">Group Import</h1>
+        <div class="space-y-6">
+
+            <!-- Create Group Manually -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" x-data="{ gname: '', gcode: '', saving: false, err: '', done: '' }">
+                <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 flex items-center gap-2.5">
+                    <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                    <h2 class="text-sm font-semibold text-gray-900">Create New Group</h2>
+                </div>
+                <div class="p-5 flex flex-wrap items-end gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Group Name</label>
+                        <input x-model="gname" placeholder="e.g. BODY CRAFT" autocomplete="off"
+                            class="rounded-lg border-0 py-2 pl-3 pr-3 text-xs text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-400 bg-white placeholder:text-gray-400 w-48"/>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">First Customer Code</label>
+                        <input x-model="gcode" placeholder="e.g. BNG001" autocomplete="off"
+                            class="rounded-lg border-0 py-2 pl-3 pr-3 text-xs text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-400 bg-white placeholder:text-gray-400 w-44"/>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" :disabled="saving"
+                            @click="if(!gname.trim()||!gcode.trim()){err='Both fields required';return;} err=''; done=''; saving=true; fetch('/admin/groups/create',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'groupName='+encodeURIComponent(gname)+'&customerCode='+encodeURIComponent(gcode)}).then(async r=>{if(r.ok){done='Group created.';gname='';gcode='';}else{err=await r.text();} saving=false;})"
+                            class="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                            <span x-text="saving ? 'Creating…' : 'Create Group'"></span>
+                        </button>
+                        <span x-show="err" x-text="err" class="text-[11px] text-red-500" x-cloak></span>
+                        <span x-show="done" x-text="done" class="text-[11px] text-emerald-600 font-medium" x-cloak></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Upload -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 flex items-center">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        </div>
+                        <h2 class="text-sm font-semibold text-gray-900">Group Import</h2>
+                    </div>
+                </div>
+                <div class="p-6">
+                <h3 class="text-sm font-bold text-gray-900 mb-1">Step 1 — Upload Excel File</h3>
+                <p class="text-xs text-gray-400 mb-4">Select a <span class="font-semibold">.xlsx</span> file. After upload you will choose which sheet and columns to use.</p>
+
+                <form hx-post="/admin/group-import/parse"
+                      hx-target="#step-result"
+                      hx-encoding="multipart/form-data"
+                      hx-indicator="#parse-spinner"
+                      class="flex items-center gap-3">
+                    <label class="flex items-center gap-2.5 cursor-pointer rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        <span id="file-label">Choose file…</span>
+                        <input type="file" name="excelFile" accept=".xlsx,.xls" required class="hidden"
+                               onchange="document.getElementById('file-label').textContent = this.files[0]?.name || 'Choose file…'; this.form.querySelector('[type=submit]').click()">
+                    </label>
+                    <!-- Hidden submit so selecting a file auto-uploads -->
+                    <button type="submit" class="hidden"></button>
+                    <svg id="parse-spinner" class="htmx-indicator animate-spin w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                </form>
+                </div>
+            </div>
+
+            <!-- Step 2 & 3 land here via HTMX -->
+            <div id="step-result">
+                <!-- Step 2 (column picker + Preview Groups) swaps in here after file upload -->
+                <!-- Step 3 (import result) swaps in here after Import is clicked -->
+            </div>
+
+        </div>
+    </main>
+
+<%- include('../partials/layout_bottom') %>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= locals.pageTitle || 'Kosca Distribution LLP' %></title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: {
+                            50:  '#f0eff9',
+                            100: '#dddcf2',
+                            200: '#b8b3e3',
+                            300: '#9188d4',
+                            400: '#6b5fc4',
+                            500: '#4d47a8',
+                            600: '#3d3878',
+                            700: '#312d63',
+                            800: '#251f4e',
+                            900: '#1a1438',
+                            950: '#110c26',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('nav', { open: false });
+        });
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script>
+        document.addEventListener('htmx:afterSwap', function(event) {
+            if (typeof Alpine === 'undefined') return;
+            Alpine.initTree(event.detail.target);
+            // Sync filter badge counts from server-rendered state
+            var fs = document.getElementById('filter-state');
+            if (!fs) return;
+            var ag = fs.dataset.group || '';
+            var ap = fs.dataset.psr || '';
+            // Sync group checkboxes + badge
+            document.querySelectorAll('input[name=group]').forEach(function(el) {
+                el.checked = ag ? el.value === ag : false;
+            });
+            var gf = document.getElementById('group-filter');
+            if (gf) Alpine.$data(gf).grpCount = document.querySelectorAll('input[name=group]:checked').length;
+            // Sync psr checkboxes + badge
+            document.querySelectorAll('input[name=psr]').forEach(function(el) { el.checked = ap ? el.value === ap : false; });
+            var pf = document.getElementById('psr-filter');
+            if (pf) Alpine.$data(pf).psrCount = document.querySelectorAll('input[name=psr]:checked').length;
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .table-container::-webkit-scrollbar { height: 6px; width: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 3px; }
+        .table-container::-webkit-scrollbar-track { background: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased" x-data>
+
+    <!-- Skip to main content -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:bg-indigo-600 focus:text-white focus:px-4 focus:py-2 focus:text-sm">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30" style="background:#dddcf2;border-bottom:1px solid #b8b3e3">
+        <div class="px-4 lg:px-8">
+            <div class="flex items-center h-12">
+                <!-- Left: Logo -->
+                <div class="flex items-center gap-1 flex-shrink-0">
+                    <% const _cp = locals.currentPath || ''; %>
+                    <% if (locals.user && (_cp.startsWith('/ar') || _cp.startsWith('/admin'))) { %>
+                    <button class="sm:hidden p-2.5 rounded-lg transition-colors" style="color:#4d47a8"
+                        onmouseover="this.style.background='#dddcf2'" onmouseout="this.style.background='transparent'"
+                        @click="$store.nav.open = !$store.nav.open" aria-label="Toggle menu">
+                        <svg x-show="!$store.nav.open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg x-show="$store.nav.open" x-cloak style="display:none" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    <% } %>
+                    <a href="/" class="flex items-center gap-1.5 mr-1">
+                        <img src="/kosca-logo.png" alt="Kosca" style="height:32px;width:32px;object-fit:contain;">
+                        <span class="text-sm font-bold tracking-tight hidden sm:inline" style="color:#3d3878">Kosca Distribution LLP</span>
+                    </a>
+                    <%
+                        const _hm = locals.hasModule || function(){ return false; };
+                        const _isAdmin = locals.user && locals.user.role === 'ADMIN';
+                        const _canDash = _hm('ar_dashboard');
+                        const _canDir  = _hm('ar_directory');
+                        const _canPS   = _hm('ar_pending_settlement');
+                        const _canUp   = _hm('ar_upload');
+                        const _canAsgn = _hm('ar_assign');
+                        const _canKA   = _hm('admin_key_accounts');
+                        const _canSD   = _hm('admin_sub_distributors');
+                        const _canSA   = _hm('admin_site_assignments');
+                        const _canGI   = _hm('admin_group_import');
+                        const _hasAdmin = _canKA || _canSD || _isAdmin || _canUp || _canAsgn || _canSA || _canGI;
+                        const _arChild = _cp.startsWith('/ar/directory') || _cp.startsWith('/ar/groups');
+                        const _admChild = _cp.startsWith('/admin') || _cp.startsWith('/ar/upload') || _cp.startsWith('/ar/assignments');
+                    %>
+                </div>
+
+                <!-- Center: Nav -->
+                <% if (locals.user && (_cp.startsWith('/ar') || _cp.startsWith('/admin'))) { %>
+                    <nav class="hidden sm:flex items-center justify-center gap-0.5 flex-1">
+                        <% if (_canDash) { %>
+                        <a href="/ar" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
+                           style="<%= _cp === '/ar' ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
+                           onmouseover="<%= _cp !== '/ar' ? "this.style.background='#c9c5e8'" : '' %>"
+                           onmouseout="<%= _cp !== '/ar' ? "this.style.background=''" : '' %>">Home</a>
+                        <% } %>
+                        <% if (_canDir) { %>
+                        <a href="/ar/directory" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
+                           style="<%= _cp.startsWith('/ar/directory') ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
+                           onmouseover="<%= !_cp.startsWith('/ar/directory') ? "this.style.background='#c9c5e8'" : '' %>"
+                           onmouseout="<%= !_cp.startsWith('/ar/directory') ? "this.style.background=''" : '' %>">AR</a>
+                        <a href="/ar/groups" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
+                           style="<%= _cp.startsWith('/ar/groups') ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
+                           onmouseover="<%= !_cp.startsWith('/ar/groups') ? "this.style.background='#c9c5e8'" : '' %>"
+                           onmouseout="<%= !_cp.startsWith('/ar/groups') ? "this.style.background=''" : '' %>">Groups</a>
+                        <% } %>
+                        <% if (_canPS) { %>
+                        <a href="/ar/pending-settlement" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
+                           style="<%= _cp.startsWith('/ar/pending-settlement') ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>"
+                           onmouseover="<%= !_cp.startsWith('/ar/pending-settlement') ? "this.style.background='#c9c5e8'" : '' %>"
+                           onmouseout="<%= !_cp.startsWith('/ar/pending-settlement') ? "this.style.background=''" : '' %>">Pending Settlement</a>
+                        <% } %>
+                        <% if (_hasAdmin) { %>
+                        <div class="w-px h-4 mx-1" style="background:#b8b3e3"></div>
+                        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                            <button @click="open = !open" :aria-expanded="open" class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
+                                    style="<%= _admChild ? 'background:#4d47a8;color:#fff' : 'color:#3d3878' %>">
+                                Settings
+                                <svg class="w-2.5 h-2.5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition class="absolute left-0 top-full mt-1 w-44 bg-white rounded-lg border border-gray-100 py-1" style="box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:50">
+                                <% if (_canUp) { %><a href="/ar/upload" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/ar/upload') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Upload</a><% } %>
+                                <% if (_canAsgn) { %><a href="/ar/assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/ar/assignments') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">CO Assign</a><% } %>
+                                <% if (_canKA || _canSD) { %><a href="/admin/categories" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/categories') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Categories</a><% } %>
+                                <% if (_canKA || _canSD || _isAdmin || _canSA || _canGI) { %><div class="h-px bg-gray-100 my-1 mx-2"></div><% } %>
+                                <% if (_isAdmin) { %><a href="/admin/users" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/users') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Users</a><% } %>
+                                <% if (_canSA) { %><a href="/admin/site-assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/site-assignments') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Change Code Location</a><% } %>
+                                <% if (_canGI) { %><a href="/admin/group-import" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/group-import') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Group Import</a><% } %>
+                                <% if (_isAdmin) { %><a href="/admin/branding" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors <%= _cp.startsWith('/admin/branding') ? 'text-violet-700 bg-violet-50' : 'text-gray-700 hover:bg-gray-50' %>">Branding</a><% } %>
+                            </div>
+                        </div>
+                        <% } %>
+                    </nav>
+                <% } %>
+
+                <!-- Right: User -->
+                <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 ml-auto">
+                    <% if (locals.user) { %>
+                        <%
+                            const si = locals.syncInfo || {};
+                            const _syncParts = [];
+                            if (si.arImportedAt) _syncParts.push('AR Sync: ' + si.arImportedAt);
+                            if (si.cmImportedAt) _syncParts.push('CM Sync: ' + si.cmImportedAt);
+                            if (si.psImportedAt) _syncParts.push('PS Sync: ' + si.psImportedAt);
+                            const _syncTooltip = _syncParts.length ? _syncParts.join('\n') : 'No sync data';
+                        %>
+                        <% if (_syncParts.length) { %>
+                        <div class="relative" title="<%= _syncTooltip %>" style="cursor:default">
+                            <svg class="w-4 h-4" style="color:#9188d4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                        </div>
+                        <% } %>
+                        <div class="hidden sm:flex flex-col items-end">
+                            <span class="text-xs font-semibold leading-none" style="color:#312d63"><%= locals.user.name %></span>
+                            <span class="text-[9px] uppercase font-bold tracking-wider mt-0.5" style="color:#9188d4"><%= locals.user.role %></span>
+                        </div>
+                        <div class="h-7 w-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0" style="background:linear-gradient(135deg,#4d47a8,#3d3878)">
+                            <%= locals.user.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <a href="/logout" aria-label="Sign Out" style="color:#9188d4;transition:color 0.15s" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#9188d4'" title="Sign Out">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                        </a>
+                    <% } else { %>
+                        <a href="/login" class="text-sm font-semibold" style="color:#3d3878">Sign In</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </header>
