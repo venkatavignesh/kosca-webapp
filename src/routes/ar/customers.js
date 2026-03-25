@@ -183,7 +183,7 @@ router.get('/ar/customers/:code/pending-settlement', requireAuth, requireModule(
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const fmt = d => { if (!d) return '—'; const dt = new Date(d); return String(dt.getDate()).padStart(2,'0') + '-' + MONTHS[dt.getMonth()] + '-' + dt.getFullYear(); };
         const fmtAmt = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n);
-        const badgeClass = tc => tc === 'CR' ? 'bg-green-50 text-green-700 border-green-200' : tc === 'SRN' ? 'bg-amber-50 text-amber-700 border-amber-200' : tc === 'ADV' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-50 text-gray-600 border-gray-200';
+        const badgeClass = tc => tc === 'CR' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800' : tc === 'SRN' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800' : tc === 'ADV' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800' : 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
         const typeLabel = tc => tc === 'CR' ? 'Credit Note' : tc === 'SRN' ? 'Sales Return' : tc === 'ADV' ? 'Advance' : tc || '—';
 
         if (records.length === 0) {
@@ -193,27 +193,27 @@ router.get('/ar/customers/:code/pending-settlement', requireAuth, requireModule(
         const rows = records.map(r => {
             const tc = (r.type || '').toUpperCase();
             const badge = r.type ? `<span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${badgeClass(tc)}">${typeLabel(tc)}</span>` : '—';
-            return `<tr class="border-t border-gray-100 text-center">
-                <td class="py-1.5 px-3 text-xs text-gray-500 whitespace-nowrap">${fmt(r.documentDate)}</td>
-                <td class="py-1.5 px-3 text-xs font-mono text-gray-700 whitespace-nowrap">${escHtml(r.documentNo || '—')}</td>
+            return `<tr class="border-t border-gray-100 dark:border-gray-700 text-center">
+                <td class="py-1.5 px-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">${fmt(r.documentDate)}</td>
+                <td class="py-1.5 px-3 text-xs font-mono text-gray-700 dark:text-gray-300 whitespace-nowrap">${escHtml(r.documentNo || '—')}</td>
                 <td class="py-1.5 px-3">${badge}</td>
-                <td class="py-1.5 px-3 text-xs font-semibold text-gray-800 tabular-nums whitespace-nowrap">${fmtAmt(r.amount)}</td>
+                <td class="py-1.5 px-3 text-xs font-semibold text-gray-800 dark:text-gray-100 tabular-nums whitespace-nowrap">${fmtAmt(r.amount)}</td>
             </tr>`;
         }).join('');
 
         const total = records.reduce((s, r) => s + r.amount, 0);
         res.send(`<table class="w-full text-xs">
             <colgroup><col style="width:20%"><col style="width:35%"><col style="width:25%"><col style="width:20%"></colgroup>
-            <thead><tr class="bg-gray-50 border-b border-gray-100">
-                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Doc Date</th>
-                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Document No</th>
-                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Type</th>
-                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Amount</th>
+            <thead><tr class="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Doc Date</th>
+                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Document No</th>
+                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Type</th>
+                <th class="py-1.5 px-3 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Amount</th>
             </tr></thead>
             <tbody>${rows}</tbody>
-            <tfoot><tr class="border-t-2 border-gray-200 bg-gray-50/60">
-                <td colspan="3" class="py-1.5 px-3 text-xs font-semibold text-gray-500 text-right">Total</td>
-                <td class="py-1.5 px-3 text-xs font-bold text-gray-800 tabular-nums text-center">${fmtAmt(total)}</td>
+            <tfoot><tr class="border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/60">
+                <td colspan="3" class="py-1.5 px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 text-right">Total</td>
+                <td class="py-1.5 px-3 text-xs font-bold text-gray-800 dark:text-gray-100 tabular-nums text-center">${fmtAmt(total)}</td>
             </tr></tfoot>
         </table>`);
     } catch (err) {

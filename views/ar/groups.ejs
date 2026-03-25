@@ -16,19 +16,19 @@
         <div class="flex justify-center border-b border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-[var(--surface-secondary)] px-2">
             <button @click="tab='key'; history.replaceState(null,'','/ar/groups?tab=key')"
                 hx-get="/ar/groups-data?tab=key" hx-target="#groups-data" hx-indicator="#groups-spinner"
-                :class="tab==='key' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                :class="tab==='key' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600'"
                 class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Key</button>
             <button @click="tab='sub'; history.replaceState(null,'','/ar/groups?tab=sub')"
                 hx-get="/ar/groups-data?tab=sub" hx-target="#groups-data" hx-indicator="#groups-spinner"
-                :class="tab==='sub' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                :class="tab==='sub' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600'"
                 class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Sub D</button>
             <button @click="tab='nonkey'; history.replaceState(null,'','/ar/groups?tab=nonkey')"
                 hx-get="/ar/groups-data?tab=nonkey" hx-target="#groups-data" hx-indicator="#groups-spinner"
-                :class="tab==='nonkey' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                :class="tab==='nonkey' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600'"
                 class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Non-Key</button>
             <button @click="tab='ungrouped'; history.replaceState(null,'','/ar/groups?tab=ungrouped')"
                 hx-get="/ar/groups-data?tab=ungrouped" hx-target="#groups-data" hx-indicator="#groups-spinner"
-                :class="tab==='ungrouped' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                :class="tab==='ungrouped' ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold' : 'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600'"
                 class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Ungrouped</button>
             <svg id="groups-spinner" class="htmx-indicator animate-spin w-3.5 h-3.5 text-indigo-400 self-center ml-2" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>

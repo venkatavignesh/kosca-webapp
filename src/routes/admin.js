@@ -404,22 +404,22 @@ router.post('/group-import/parse', canManageGroupImport, groupUpload.single('exc
   <input type="hidden" name="filePath" value="${filePath.replace(/"/g, '&quot;')}">
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
     <div>
-      <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Sheet</label>
-      <select name="sheet" id="gi-sheet" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-500 bg-white appearance-none"
+      <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Sheet</label>
+      <select name="sheet" id="gi-sheet" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 dark:text-[var(--input-text)] ring-1 ring-inset ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)] appearance-none"
         hx-post="/admin/group-import/reload-cols" hx-target="#gi-col-selectors" hx-include="[name='filePath']" hx-trigger="change">
         ${sheetOptions}
       </select>
     </div>
     <div id="gi-col-selectors" class="contents">
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Group Name Column</label>
-        <select name="groupCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-500 bg-white appearance-none">
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Group Name Column</label>
+        <select name="groupCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 dark:text-[var(--input-text)] ring-1 ring-inset ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)] appearance-none">
           ${colOptions(0)}
         </select>
       </div>
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Customer Code Column</label>
-        <select name="codeCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-500 bg-white appearance-none">
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Customer Code Column</label>
+        <select name="codeCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 dark:text-[var(--input-text)] ring-1 ring-inset ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)] appearance-none">
           ${colOptions(1)}
         </select>
       </div>
@@ -457,12 +457,12 @@ router.post('/group-import/reload-cols', canManageGroupImport, async (req, res) 
         const colOptions2 = headers.map((c, i) => `<option value="${i}"${i === 1 ? ' selected' : ''}>${escHtml(c)}</option>`).join('');
         res.send(`
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Group Name Column</label>
-        <select name="groupCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-500 bg-white appearance-none">${colOptions}</select>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Group Name Column</label>
+        <select name="groupCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 dark:text-[var(--input-text)] ring-1 ring-inset ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)] appearance-none">${colOptions}</select>
       </div>
       <div>
-        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Customer Code Column</label>
-        <select name="codeCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-500 bg-white appearance-none">${colOptions2}</select>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Customer Code Column</label>
+        <select name="codeCol" class="w-full rounded-lg border-0 py-2.5 pl-3 pr-8 text-sm text-gray-900 dark:text-[var(--input-text)] ring-1 ring-inset ring-gray-200 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)] appearance-none">${colOptions2}</select>
       </div>`);
     } catch (_) {
         res.send('<div class="col-span-2 text-red-500 text-sm">Could not read sheet columns.</div>');
@@ -561,28 +561,28 @@ router.post('/group-import/process', canManageGroupImport, async (req, res) => {
             for (const code of codes) {
                 const name = masterMap[code];
                 const inv  = invoiceMap[code];
-                const nameCell = name ? name.replace(/</g, '&lt;') : '<span class="text-gray-400">—</span>';
+                const nameCell = name ? name.replace(/</g, '&lt;') : '<span class="text-gray-400 dark:text-gray-500">—</span>';
                 const invCell  = inv
-                    ? `${fmt(inv.balance)} <span class="text-xs text-gray-400">(${inv.count} invoice${inv.count !== 1 ? 's' : ''})</span>`
-                    : '<span class="text-xs text-gray-400 italic">No invoices</span>';
-                rowsHtml += `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-  <td class="px-4 py-2 text-xs font-mono text-gray-700 whitespace-nowrap">${code}</td>
-  <td class="px-4 py-2 text-sm text-gray-800">${nameCell}</td>
-  <td class="px-4 py-2 text-right text-sm font-medium text-gray-800">${invCell}</td>
+                    ? `${fmt(inv.balance)} <span class="text-xs text-gray-400 dark:text-gray-500">(${inv.count} invoice${inv.count !== 1 ? 's' : ''})</span>`
+                    : '<span class="text-xs text-gray-400 dark:text-gray-500 italic">No invoices</span>';
+                rowsHtml += `<tr class="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+  <td class="px-4 py-2 text-xs font-mono text-gray-700 dark:text-gray-300 whitespace-nowrap">${code}</td>
+  <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">${nameCell}</td>
+  <td class="px-4 py-2 text-right text-sm font-medium text-gray-800 dark:text-gray-200">${invCell}</td>
 </tr>`;
             }
             groupCardsHtml += `
-<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-  <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-    <p class="text-sm font-bold text-gray-900">${safeGrp}</p>
-    <span class="text-xs text-gray-500">${codes.length} location${codes.length !== 1 ? 's' : ''}</span>
+<div class="bg-white dark:bg-[var(--surface-primary)] rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+    <p class="text-sm font-bold text-gray-900 dark:text-gray-100">${safeGrp}</p>
+    <span class="text-xs text-gray-500 dark:text-gray-400">${codes.length} location${codes.length !== 1 ? 's' : ''}</span>
   </div>
   <div class="overflow-x-auto">
     <table class="w-full text-left">
-      <thead><tr class="border-b border-gray-100">
-        <th class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Code</th>
-        <th class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Name</th>
-        <th class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide text-right">Outstanding (Active)</th>
+      <thead><tr class="border-b border-gray-100 dark:border-gray-700">
+        <th class="px-4 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Code</th>
+        <th class="px-4 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Name</th>
+        <th class="px-4 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right">Outstanding (Active)</th>
       </tr></thead>
       <tbody>${rowsHtml}</tbody>
     </table>
@@ -591,13 +591,13 @@ router.post('/group-import/process', canManageGroupImport, async (req, res) => {
         }
 
         const summaryParts = [];
-        if (saved)   summaryParts.push(`<span class="text-green-600 font-semibold">${saved} saved</span>`);
-        if (updated) summaryParts.push(`<span class="text-indigo-600 font-semibold">${updated} updated</span>`);
+        if (saved)   summaryParts.push(`<span class="text-green-600 dark:text-green-400 font-semibold">${saved} saved</span>`);
+        if (updated) summaryParts.push(`<span class="text-indigo-600 dark:text-indigo-400 font-semibold">${updated} updated</span>`);
         const summaryNote = summaryParts.length ? ` &middot; ${summaryParts.join(' &middot; ')}` : '';
 
         res.send(`
 <div class="space-y-3">
-  <p class="text-sm text-gray-500">${groupNames.length} group${groupNames.length !== 1 ? 's' : ''} &middot; ${allCodes.length} code${allCodes.length !== 1 ? 's' : ''}${summaryNote}</p>
+  <p class="text-sm text-gray-500 dark:text-gray-400">${groupNames.length} group${groupNames.length !== 1 ? 's' : ''} &middot; ${allCodes.length} code${allCodes.length !== 1 ? 's' : ''}${summaryNote}</p>
   ${groupCardsHtml}
 </div>`);
     } catch (err) {

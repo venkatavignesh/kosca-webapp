@@ -22,7 +22,7 @@
                 <!-- Card Header -->
                 <div class="px-4 md:px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 flex items-center">
                     <div class="flex items-center gap-2.5">
-                        <div class="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-lg border border-indigo-100 dark:border-indigo-800">
+                        <div class="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-100 dark:border-indigo-800">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </div>
                         <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Users</h2>
@@ -61,7 +61,7 @@
                                             <%= u.name %>
                                                 <% if (u.id===user.id) { %>
                                                     <span
-                                                        class="inline-flex items-center rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">You</span>
+                                                        class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-950 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-800">You</span>
                                                     <% } %>
                                         </div>
                                     </td>
@@ -69,11 +69,11 @@
                                         <%= u.email %>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-2.5 text-sm text-center">
-                                        <% var roleColor='bg-gray-50 text-gray-700 border-gray-200 ring-gray-500/10' ;
+                                        <% var roleColor='bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-700 ring-gray-500/10 dark:ring-gray-700' ;
                                             if (u.role==='ADMIN' ) {
-                                            roleColor='bg-purple-50 text-purple-700 border-purple-200 ring-purple-500/10'
+                                            roleColor='bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800 ring-purple-500/10 dark:ring-purple-800'
                                             ; } if (u.role==='MANAGER' ) {
-                                            roleColor='bg-blue-50 text-blue-700 border-blue-200 ring-blue-500/10' ; } %>
+                                            roleColor='bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 ring-blue-500/10 dark:ring-blue-800' ; } %>
                                             <span
                                                 class="inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-bold tracking-widest border shadow-sm ring-1 <%= roleColor %>">
                                                 <%= u.role %>
@@ -297,14 +297,14 @@
                                             class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Full Name</label>
                                         <input type="text" name="name" id="name-<%= u.id %>" value="<%= u.name %>"
                                             required
-                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 dark:text-[var(--input-text)] shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)]">
                                     </div>
                                     <div class="col-span-2">
                                         <label for="email-<%= u.id %>"
                                             class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Email Address</label>
                                         <input type="email" name="email" id="email-<%= u.id %>" value="<%= u.email %>"
                                             required
-                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors">
+                                            class="mt-2 block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 dark:text-[var(--input-text)] shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 hover:ring-gray-400 transition-colors dark:bg-[var(--input-bg)]">
                                     </div>
                                     <div class="col-span-2 sm:col-span-1">
                                         <label for="password-<%= u.id %>"

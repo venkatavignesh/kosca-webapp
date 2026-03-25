@@ -45,7 +45,7 @@
                     <%= i + 1 %>
                     <% } %>
                 </div>
-                <span class="text-[8px] font-medium <%= active ? 'text-indigo-600' : complete ? 'text-indigo-400' : 'text-gray-300 dark:text-gray-600' %> whitespace-nowrap"><%= s %></span>
+                <span class="text-[8px] font-medium <%= active ? 'text-indigo-600 dark:text-indigo-400' : complete ? 'text-indigo-400 dark:text-indigo-500' : 'text-gray-300 dark:text-gray-600' %> whitespace-nowrap"><%= s %></span>
             </div>
             <% }); %>
         </div>
@@ -57,7 +57,7 @@
         </div>
 
         <!-- Message -->
-        <p class="text-[11px] text-center font-medium <%= done ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400 animate-pulse' %>">
+        <p class="text-[11px] text-center font-medium <%= done ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 animate-pulse' %>">
             <%= message %>
         </p>
     </div>

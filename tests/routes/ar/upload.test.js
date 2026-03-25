@@ -39,7 +39,7 @@ describe('Upload routes', () => {
                     contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 });
             expect(res.status).toBe(200);
-            expect(res.text).toContain('bg-green-100');
+            expect(res.text).toContain('bg-green-50');
             expect(uploadQueue.add).toHaveBeenCalledWith('process-excel', expect.objectContaining({
                 type: 'ar_report'
             }));

@@ -105,12 +105,12 @@
         const invoiceCount = g._count.id || 0;
         const code  = g.customerCode || '-';
         const safeId = code.replace(/[^a-zA-Z0-9]/g, '_');
-        let agingBadgeColor = 'bg-gray-100 text-gray-600 border-gray-200';
-        if      (maxAging > 90) agingBadgeColor = 'bg-red-50 text-red-700 border-red-200';
-        else if (maxAging > 60) agingBadgeColor = 'bg-orange-50 text-orange-700 border-orange-200';
-        else if (maxAging > 30) agingBadgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
-        else if (maxAging >  0) agingBadgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
-        else                    agingBadgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        let agingBadgeColor = 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600';
+        if      (maxAging > 90) agingBadgeColor = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800';
+        else if (maxAging > 60) agingBadgeColor = 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-400 dark:border-orange-800';
+        else if (maxAging > 30) agingBadgeColor = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800';
+        else if (maxAging >  0) agingBadgeColor = 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800';
+        else                    agingBadgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800';
         const colSpan = _hasCO ? 9 : 8;
     %>
     <tbody x-data="{ open: false, loaded: false }">
@@ -179,7 +179,7 @@
                         <span class="inline-flex items-center rounded px-1 py-0.5 text-[8px] font-bold bg-orange-100 text-orange-700 border border-orange-200">⚠ DISPUTED</span>
                         <% } %>
                         <% if (g.hasPendingSettlement) { %>
-                        <span class="inline-flex items-center rounded px-1 py-0.5 text-[8px] font-bold bg-amber-50 text-amber-700 border border-amber-200">PS</span>
+                        <span class="inline-flex items-center rounded px-1 py-0.5 text-[8px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800">PS</span>
                         <% } %>
                     </div>
                 </div>
@@ -188,7 +188,7 @@
             <!-- Group -->
             <td class="col-grp px-3 py-2.5 text-center">
                 <% if (g.groupName) { %>
-                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-violet-50 text-violet-700 border border-violet-200 whitespace-nowrap cursor-pointer hover:bg-violet-100 transition-colors"
+                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950 dark:text-violet-400 dark:border-violet-800 whitespace-nowrap cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900 transition-colors"
                       hx-get="/ar/invoices?group=<%= encodeURIComponent(g.groupName) %>"
                       hx-target="#table-data"
                       hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge']"
@@ -202,7 +202,7 @@
             <!-- PSR -->
             <td class="col-bde px-3 py-2.5 text-center">
                 <% if (g.psrName) { %>
-                <span class="inline-flex items-center rounded-md px-1.5 py-px text-[10px] font-medium leading-tight bg-green-50 text-green-700 border border-green-200 break-words cursor-pointer hover:bg-green-100 transition-colors"
+                <span class="inline-flex items-center rounded-md px-1.5 py-px text-[10px] font-medium leading-tight bg-green-50 text-green-700 border border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800 break-words cursor-pointer hover:bg-green-100 dark:hover:bg-green-900 transition-colors"
                       hx-get="/ar/invoices?psr=<%= encodeURIComponent(g.psrName) %>"
                       hx-target="#table-data"
                       hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='group']"
@@ -231,7 +231,7 @@
                     <div id="assign-badge-<%= safeId %>" class="flex justify-center gap-1 cursor-pointer" @click.stop="open = !open">
                         <% if (g.assignedOfficerIds && g.assignedOfficerIds.length > 0) { %>
                             <% g.assignedOfficerIds.forEach(function(oid) { const o = officers.find(f => f.id === oid); if (o) { %>
-                                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-teal-50 text-teal-700 ring-1 ring-teal-200"><%= o.name %></span>
+                                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-teal-50 text-teal-700 ring-1 ring-teal-200 dark:bg-teal-950 dark:text-teal-400 dark:ring-teal-800"><%= o.name %></span>
                             <% } }); %>
                         <% } else { %>
                             <span class="text-xs text-gray-400 italic">+ CO</span>

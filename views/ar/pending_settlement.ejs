@@ -58,9 +58,9 @@
                             }
                             var amtStr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(r.amount);
                             var tc = (r.type || '').toUpperCase();
-                            var badgeColor = tc === 'CR'  ? 'bg-green-50 text-green-700 border-green-200'
-                                           : tc === 'SRN' ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                           : tc === 'ADV' ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            var badgeColor = tc === 'CR'  ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800'
+                                           : tc === 'SRN' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800'
+                                           : tc === 'ADV' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800'
                                            : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700';
                             var typeLabel = tc === 'CR'  ? 'Credit Note'
                                           : tc === 'SRN' ? 'Sales Return'

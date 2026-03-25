@@ -10,26 +10,33 @@ router.get('/ar/upload', requireAuth, requireModule('ar_upload'), async (req, re
     const fmt = (iso) => iso
         ? new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
         : null;
-    const [lastArSync, lastCmSync] = await Promise.all([
+    const [lastArSync, lastCmSync, lastPsSync] = await Promise.all([
         connection.get('kosca:last_ar_sync'),
-        connection.get('kosca:last_cm_sync')
+        connection.get('kosca:last_cm_sync'),
+        connection.get('kosca:last_ps_sync')
     ]);
     res.render('ar/upload', {
         arReportPath: process.env.AR_REPORT_PATH || null,
         customerMasterPath: process.env.CUSTOMER_MASTER_PATH || null,
+        pendingSettlementPath: process.env.PENDING_SETTLEMENT_PATH || null,
         lastArSync: fmt(lastArSync),
-        lastCmSync: fmt(lastCmSync)
+        lastCmSync: fmt(lastCmSync),
+        lastPsSync: fmt(lastPsSync)
     });
 });
 
 // Handle File Upload via HTMX (AR report or Customer Master)
 router.post('/ar/upload', requireAuth, requireModule('ar_upload'), upload.single('excelFile'), async (req, res) => {
     if (!req.file) {
-        return res.status(400).send('<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Please upload an excel file.</div>');
+        return res.status(400).send('<div class="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded relative" role="alert">Please upload an excel file.</div>');
     }
 
-    const uploadType = req.body.uploadType === 'customer_master' ? 'customer_master' : 'ar_report';
-    const label = uploadType === 'customer_master' ? 'Customer Master' : 'AR Report';
+    const uploadType = req.body.uploadType === 'customer_master' ? 'customer_master'
+                     : req.body.uploadType === 'pending_settlement' ? 'pending_settlement'
+                     : 'ar_report';
+    const label = uploadType === 'customer_master' ? 'Customer Master'
+                : uploadType === 'pending_settlement' ? 'Pending Settlement'
+                : 'AR Report';
 
     try {
         await uploadQueue.add('process-excel', {
@@ -45,12 +52,12 @@ router.post('/ar/upload', requireAuth, requireModule('ar_upload'), upload.single
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
-        res.send(`<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        res.send(`<div class="bg-green-50 dark:bg-green-950 border border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded relative" role="alert">
       ${label}: ${safeName} uploaded and added to processing queue. <a href="/ar" class="underline font-semibold">View Dashboard</a>
     </div>`);
     } catch (error) {
         console.error('Upload Error:', error);
-        res.status(500).send('<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">An error occurred during file upload.</div>');
+        res.status(500).send('<div class="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded relative" role="alert">An error occurred during file upload.</div>');
     }
 });
 
@@ -58,9 +65,10 @@ router.post('/ar/upload', requireAuth, requireModule('ar_upload'), upload.single
 router.post('/ar/sync-now', requireAuth, requireRole(['ADMIN', 'MANAGER']), async (req, res) => {
     const AR_REPORT_PATH = process.env.AR_REPORT_PATH;
     const CUSTOMER_MASTER_PATH = process.env.CUSTOMER_MASTER_PATH;
+    const PENDING_SETTLEMENT_PATH = process.env.PENDING_SETTLEMENT_PATH;
 
-    if (!AR_REPORT_PATH && !CUSTOMER_MASTER_PATH) {
-        return res.status(400).send('<div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">No auto-sync paths are configured.</div>');
+    if (!AR_REPORT_PATH && !CUSTOMER_MASTER_PATH && !PENDING_SETTLEMENT_PATH) {
+        return res.status(400).send('<div class="bg-yellow-50 dark:bg-yellow-950 border border-yellow-300 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400 px-4 py-3 rounded">No auto-sync paths are configured.</div>');
     }
 
     try {
@@ -70,10 +78,13 @@ router.post('/ar/sync-now', requireAuth, requireRole(['ADMIN', 'MANAGER']), asyn
         if (CUSTOMER_MASTER_PATH) {
             await uploadQueue.add('sync-now-customer-master', { filePath: CUSTOMER_MASTER_PATH, type: 'customer_master', keepFile: true });
         }
-        res.send('<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">Sync triggered from network share. Check progress below.</div>');
+        if (PENDING_SETTLEMENT_PATH) {
+            await uploadQueue.add('sync-now-pending-settlement', { filePath: PENDING_SETTLEMENT_PATH, type: 'pending_settlement', keepFile: true });
+        }
+        res.send('<div class="bg-green-50 dark:bg-green-950 border border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded">Sync triggered from network share. Check progress below.</div>');
     } catch (error) {
         console.error('Sync-now Error:', error);
-        res.status(500).send('<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">Failed to trigger sync.</div>');
+        res.status(500).send('<div class="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Failed to trigger sync.</div>');
     }
 });
 
