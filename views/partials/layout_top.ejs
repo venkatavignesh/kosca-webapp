@@ -131,8 +131,8 @@
         }
         .dark {
             --page-bg: #161b22;
-            --header-bg: #1c2129;
-            --header-border: #30363d;
+            --header-bg: #262c36;
+            --header-border: #3d444d;
             --surface-primary: #1c2129;
             --surface-secondary: #161b22;
             --surface-tertiary: #21262d;
@@ -251,7 +251,7 @@
                         <a href="/ar/groups" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
                            style="<%= _cp.startsWith('/ar/groups') ? 'background:var(--nav-active-bg);color:var(--nav-active-text)' : 'color:var(--text-tertiary)' %>"
                            onmouseover="<%= !_cp.startsWith('/ar/groups') ? "this.style.background='var(--accent-hover)'" : '' %>"
-                           onmouseout="<%= !_cp.startsWith('/ar/groups') ? "this.style.background=''" : '' %>">Groups</a>
+                           onmouseout="<%= !_cp.startsWith('/ar/groups') ? "this.style.background=''" : '' %>">Customer Groups</a>
                         <% } %>
                         <% if (_canPS) { %>
                         <a href="/ar/pending-settlement" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap"
@@ -270,7 +270,7 @@
                             <div x-show="open" x-cloak x-transition class="absolute left-0 top-full mt-1 w-44 rounded-lg py-1" style="background:var(--dropdown-bg);border:1px solid var(--dropdown-border);box-shadow:var(--dropdown-shadow);z-index:50">
                                 <% if (_canUp) { %><a href="/ar/upload" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/ar/upload') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/ar/upload') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/ar/upload') ? "this.style.background=''" : '' %>">Upload</a><% } %>
                                 <% if (_canAsgn) { %><a href="/ar/assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/ar/assignments') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/ar/assignments') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/ar/assignments') ? "this.style.background=''" : '' %>">CO Assign</a><% } %>
-                                <% if (_canKA || _canSD) { %><a href="/admin/categories" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/categories') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/categories') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/categories') ? "this.style.background=''" : '' %>">Categories</a><% } %>
+                                <% if (_canKA || _canSD) { %><a href="/admin/categories" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/categories') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/categories') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/categories') ? "this.style.background=''" : '' %>">Key & Sub D</a><% } %>
                                 <% if (_canKA || _canSD || _isAdmin || _canSA || _canGI) { %><div class="h-px my-1 mx-2" style="background:var(--dropdown-divider)"></div><% } %>
                                 <% if (_isAdmin) { %><a href="/admin/users" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/users') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/users') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/users') ? "this.style.background=''" : '' %>">Users</a><% } %>
                                 <% if (_canSA) { %><a href="/admin/site-assignments" @click="open=false" class="block px-3 py-1.5 text-xs font-medium transition-colors" style="<%= _cp.startsWith('/admin/site-assignments') ? 'color:var(--dropdown-active-text);background:var(--dropdown-active-bg)' : 'color:var(--text-light)' %>" onmouseover="<%= !_cp.startsWith('/admin/site-assignments') ? "this.style.background='var(--dropdown-hover)'" : '' %>" onmouseout="<%= !_cp.startsWith('/admin/site-assignments') ? "this.style.background=''" : '' %>">Change Code Location</a><% } %>
@@ -285,16 +285,18 @@
                 <!-- Right: Theme Toggle + User -->
                 <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 ml-auto">
                     <!-- Theme toggle -->
-                    <button @click="$store.theme.toggle()" class="p-1.5 rounded-lg transition-colors"
-                            :title="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"
-                            style="color:var(--text-muted)"
-                            onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background=''">
-                        <svg x-show="!$store.theme.dark" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button @click="$store.theme.toggle()"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors border"
+                            style="color:var(--text-secondary);border-color:var(--border-primary);background:transparent"
+                            onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background='transparent'">
+                        <svg x-show="!$store.theme.dark" class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                         </svg>
-                        <svg x-show="$store.theme.dark" x-cloak style="display:none" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg x-show="$store.theme.dark" x-cloak style="display:none" class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
+                        <span x-show="!$store.theme.dark" class="whitespace-nowrap">Dark</span>
+                        <span x-show="$store.theme.dark" x-cloak style="display:none" class="whitespace-nowrap">Light</span>
                     </button>
                     <% if (locals.user) { %>
                         <%

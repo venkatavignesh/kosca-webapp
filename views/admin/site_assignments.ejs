@@ -64,7 +64,7 @@
                 <!-- Table -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
+                        <thead class="bg-gray-50/80 dark:bg-gray-800/80">
                             <tr>
                                 <th scope="col" class="py-2.5 pl-5 pr-4 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Customer</th>
                                 <th scope="col" class="px-4 py-2.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Current Site</th>
@@ -79,7 +79,7 @@
                                 </tr>
                             <% } %>
                             <% customers.forEach(function(c) { %>
-                                <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800 transition-colors">
+                                <tr class="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/20 transition-colors">
                                     <td class="py-2.5 pl-5 pr-4">
                                         <div class="text-xs font-bold text-gray-900 dark:text-gray-100"><%= c.customerName || '—' %></div>
                                         <div class="text-[11px] font-mono text-gray-400 dark:text-gray-500 mt-0.5"><%= c.customerCode %></div>

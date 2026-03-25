@@ -6,7 +6,9 @@
 
     <!-- Data Table Card -->
     <div class="bg-white dark:bg-[var(--surface-primary)] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col" x-data="{ catTab: '${keyOnly ? 'key' : subOnly ? 'sub' : 'nonkey'}' }">
-
+        <!-- Hidden inputs so all filters preserve the active category tab -->
+        <input type="hidden" name="keyOnly" x-bind:value="catTab === 'key' ? '1' : ''">
+        <input type="hidden" name="subOnly" x-bind:value="catTab === 'sub' ? '1' : ''">
 
         <!-- Card Header -->
         <div class="px-3 sm:px-5 py-2.5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2">
@@ -17,7 +19,7 @@
                 <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Customer Accounts</h2>
             </div>
             <button hx-get="/ar/invoices" hx-target="#table-data"
-                hx-include="[name='search'], [name='limit'], [name='site'], [name='bucket'], [name='sort'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only']"
+                hx-include="[name='search'], [name='limit'], [name='site'], [name='bucket'], [name='sort'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only'], [name='keyOnly'], [name='subOnly']"
                 class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-[var(--surface-secondary)] px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <svg class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -40,9 +42,9 @@
                         hx-get="/ar/invoices"
                         hx-trigger="keyup changed delay:500ms, search"
                         hx-target="#table-data"
-                        hx-include="[name='limit'], [name='site'], [name='bucket'], [name='sort'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only']"
+                        hx-include="[name='limit'], [name='site'], [name='bucket'], [name='sort'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only'], [name='keyOnly'], [name='subOnly']"
                         class="block w-full rounded-lg border-0 py-2 pl-9 pr-3 text-xs text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-[var(--input-bg)]"
-                        placeholder="Search customer or invoice...">
+                        :placeholder="catTab === 'key' ? 'Search in Key accounts...' : catTab === 'sub' ? 'Search in Sub D accounts...' : 'Search in Non-Key accounts...'">
                 </div>
 
                 <!-- Location filter dropdown -->
@@ -64,13 +66,13 @@
                                 + (selectedSites.includes(s) ? ' checked' : '')
                                 + ' hx-get="/ar/invoices"'
                                 + ' hx-trigger="change" hx-target="#table-data"'
-                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\']"'
+                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']"'
                                 + ' @change="siteCount = document.querySelectorAll(\'input[name=site]:checked\').length; var ns=Array.from(document.querySelectorAll(\'input[name=site]:checked\')).map(function(e){return e.value;}); if(ns.length>0){document.querySelectorAll(\'input[name=psr]:checked\').forEach(function(e){var ps=JSON.parse(e.dataset.sites||\'[]\');if(!ps.some(function(s){return ns.includes(s);})){e.checked=false;}});} window.dispatchEvent(new CustomEvent(\'sites-changed\',{detail:ns}));"'
                                 + ' class="w-3.5 h-3.5 rounded accent-indigo-600 cursor-pointer">'
                                 + '<span class="text-xs text-gray-700 dark:text-gray-300">' + s + '</span>'
                                 + '</label>';
                         }).join('')}
-                        ${selectedSites.length ? '<div class="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 px-3.5 pb-1"><button type="button" hx-get="/ar/invoices" hx-target="#table-data" hx-include="[name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\']" @click="document.querySelectorAll(\'[name=\\\'site\\\']\').forEach(function(el){el.checked=false;}); siteCount=0; window.dispatchEvent(new Event(\'sites-changed\')); open=false" class="text-xs text-red-500 hover:text-red-700 font-medium py-0.5">Clear all</button></div>' : ''}
+                        ${selectedSites.length ? '<div class="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 px-3.5 pb-1"><button type="button" hx-get="/ar/invoices" hx-target="#table-data" hx-include="[name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']" @click="document.querySelectorAll(\'[name=\\\'site\\\']\').forEach(function(el){el.checked=false;}); siteCount=0; window.dispatchEvent(new Event(\'sites-changed\')); open=false" class="text-xs text-red-500 hover:text-red-700 font-medium py-0.5">Clear all</button></div>' : ''}
                     </div>
                 </div>
 
@@ -94,7 +96,7 @@
                                 + (checked ? ' checked' : '')
                                 + ' hx-get="/ar/invoices"'
                                 + ' hx-trigger="change" hx-target="#table-data"'
-                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\']"'
+                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']"'
                                 + ' @change="bucketCount = document.querySelectorAll(\'input[name=bucket]:checked\').length"'
                                 + ' class="w-3.5 h-3.5 rounded accent-indigo-600 cursor-pointer">'
                                 + '<span class="text-xs text-gray-700 dark:text-gray-300">' + opt[1] + '</span>'
@@ -125,13 +127,13 @@
                                 + (selectedPsrs.includes(p.psrName) ? ' checked' : '')
                                 + ' hx-get="/ar/invoices"'
                                 + ' hx-trigger="change" hx-target="#table-data"'
-                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'], [name=\'ps_only\']"'
+                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']"'
                                 + ' @change="psrCount = document.querySelectorAll(\'input[name=psr]:checked\').length"'
                                 + ' class="w-3.5 h-3.5 rounded accent-indigo-600 cursor-pointer">'
                                 + '<span class="text-xs text-gray-700 dark:text-gray-300">' + p.psrName.replace(/</g, '&lt;') + '</span>'
                                 + '</label>';
                         }).join('')}
-                        ${selectedPsrs.length ? '<div class="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 px-3.5 pb-1"><button type="button" hx-get="/ar/invoices" hx-target="#table-data" hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'group\'], [name=\'ps_only\']" @click="document.querySelectorAll(\'[name=\\\'psr\\\']\').forEach(function(el){el.checked=false;}); psrCount=0; open=false" class="text-xs text-red-500 hover:text-red-700 font-medium py-0.5">Clear all</button></div>' : ''}
+                        ${selectedPsrs.length ? '<div class="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 px-3.5 pb-1"><button type="button" hx-get="/ar/invoices" hx-target="#table-data" hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'group\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']" @click="document.querySelectorAll(\'[name=\\\'psr\\\']\').forEach(function(el){el.checked=false;}); psrCount=0; open=false" class="text-xs text-red-500 hover:text-red-700 font-medium py-0.5">Clear all</button></div>' : ''}
                     </div>
                 </div>
 
@@ -159,16 +161,18 @@
                                 + (selectedGroup === g.groupName ? ' checked' : '')
                                 + ' hx-get="/ar/invoices"'
                                 + ' hx-trigger="change" hx-target="#table-data"'
-                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\']"'
+                                + ' hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'], [name=\'group\'],  [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']"'
                                 + ' @change="grpCount = document.querySelectorAll(\'input[name=group]:checked\').length"'
                                 + ' class="w-3.5 h-3.5 rounded accent-indigo-600 cursor-pointer">'
                                 + '<span class="text-xs text-gray-700 dark:text-gray-300">' + dispG + '</span>'
                                 + '</label>';
                         }).join('')}
-                        ${selectedGroup ? '<div class="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 px-3.5 pb-1"><button type="button" hx-get="/ar/invoices" hx-target="#table-data" hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'],  [name=\'psr_badge\'], [name=\'ps_only\']" @click="document.querySelectorAll(\'[name=\\\'group\\\']\').forEach(function(el){el.checked=false;}); grpCount=0; open=false" class="text-xs text-red-500 hover:text-red-700 font-medium py-0.5">Clear all</button></div>' : ''}
+                        ${selectedGroup ? '<div class="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 px-3.5 pb-1"><button type="button" hx-get="/ar/invoices" hx-target="#table-data" hx-include="[name=\'site\'], [name=\'search\'], [name=\'limit\'], [name=\'bucket\'], [name=\'sort\'], [name=\'psr\'],  [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']" @click="document.querySelectorAll(\'[name=\\\'group\\\']\').forEach(function(el){el.checked=false;}); grpCount=0; open=false" class="text-xs text-red-500 hover:text-red-700 font-medium py-0.5">Clear all</button></div>' : ''}
                     </div>
                 </div>
             </div>
+
+            <div class="flex items-center justify-between w-full sm:contents gap-2">
 
             ${(function(){
                 var canPS = locals.hasModule && locals.hasModule('ar_pending_settlement');
@@ -181,18 +185,18 @@
                     + (psOnly ? ' checked' : '')
                     + ' x-model="ps"'
                     + ' hx-get="/ar/invoices" hx-trigger="change" hx-target="#table-data"'
-                    + ' hx-include="[name=\'search\'],[name=\'limit\'],[name=\'site\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'],[name=\'psr_badge\']"'
+                    + ' hx-include="[name=\'search\'],[name=\'limit\'],[name=\'site\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'],[name=\'psr_badge\'],[name=\'keyOnly\'],[name=\'subOnly\']"'
                     + ' class="w-3.5 h-3.5 rounded accent-amber-600 cursor-pointer">'
                     + 'Pending Settlement'
                     + '</label>';
             })()}
 
-            <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 self-end sm:self-auto">
+            <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 ml-auto sm:ml-0">
                 <div class="relative">
                     <select name="sort"
                         hx-get="/ar/invoices"
                         hx-trigger="change" hx-target="#table-data"
-                        hx-include="[name='search'], [name='site'], [name='bucket'], [name='limit'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only']"
+                        hx-include="[name='search'], [name='site'], [name='bucket'], [name='limit'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only'], [name='keyOnly'], [name='subOnly']"
                         class="appearance-none rounded-lg border border-gray-200 dark:border-gray-700 py-1.5 pl-2.5 pr-7 text-xs text-gray-700 dark:text-gray-300 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 bg-white dark:bg-[var(--input-bg)] cursor-pointer font-medium">
                         <option value="balance_desc">Outstanding ↓</option>
                         <option value="balance_asc">Outstanding ↑</option>
@@ -209,7 +213,7 @@
                     <select name="limit" id="limit"
                         hx-get="/ar/invoices"
                         hx-trigger="change" hx-target="#table-data"
-                        hx-include="[name='search'], [name='site'], [name='bucket'], [name='sort'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only']"
+                        hx-include="[name='search'], [name='site'], [name='bucket'], [name='sort'], [name='psr'], [name='group'], [name='psr_badge'], [name='ps_only'], [name='keyOnly'], [name='subOnly']"
                         class="appearance-none rounded-lg border border-gray-200 dark:border-gray-700 py-1.5 pl-2.5 pr-7 text-xs text-gray-700 dark:text-gray-300 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 bg-white dark:bg-[var(--input-bg)] cursor-pointer font-medium">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
@@ -223,6 +227,8 @@
                     </div>
                 </div>
             </div>
+
+            </div><!-- /mobile bottom row wrapper -->
         </div>
 
         <!-- Category Sub-Tabs -->
@@ -235,9 +241,9 @@
             var siteQ = selectedSites.length ? selectedSites.map(function(s){ return 'site=' + encodeURIComponent(s); }).join('&') : '';
             var bQ = bucket ? (siteQ ? '&' : '') + 'bucket=' + bucket : '';
             var html = '<div class="flex justify-center gap-0 border-b border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-[var(--surface-secondary)]">';
-            if (canKey) html += '<button @click="catTab=\'key\'" hx-get="/ar/invoices?keyOnly=1' + (siteQ ? '&' + siteQ : '') + bQ + '" hx-target="#table-data" hx-include="[name=\'search\'],[name=\'limit\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'], [name=\'psr_badge\'], [name=\'ps_only\']" :class="catTab===\'key\' ? \'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold\' : \'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600\'" class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Key</button>';
-            if (canSub) html += '<button @click="catTab=\'sub\'" hx-get="/ar/invoices?subOnly=1' + (siteQ ? '&' + siteQ : '') + bQ + '" hx-target="#table-data" hx-include="[name=\'search\'],[name=\'limit\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'], [name=\'psr_badge\'], [name=\'ps_only\']" :class="catTab===\'sub\' ? \'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold\' : \'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600\'" class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Sub D</button>';
-            html += '<button @click="catTab=\'nonkey\'" hx-get="/ar/invoices?' + siteQ + bQ + '" hx-target="#table-data" hx-include="[name=\'search\'],[name=\'limit\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'], [name=\'psr_badge\'], [name=\'ps_only\']" :class="catTab===\'nonkey\' ? \'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold\' : \'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600\'" class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Non-Key</button>';
+            if (canKey) html += '<button @click="catTab=\'key\'" hx-get="/ar/invoices?keyOnly=1' + (siteQ ? '&' + siteQ : '') + bQ + '" hx-target="#table-data" hx-include="[name=\'search\'],[name=\'limit\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'], [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']" :class="catTab===\'key\' ? \'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold\' : \'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600\'" class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Key</button>';
+            if (canSub) html += '<button @click="catTab=\'sub\'" hx-get="/ar/invoices?subOnly=1' + (siteQ ? '&' + siteQ : '') + bQ + '" hx-target="#table-data" hx-include="[name=\'search\'],[name=\'limit\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'], [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']" :class="catTab===\'sub\' ? \'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold\' : \'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600\'" class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Sub D</button>';
+            html += '<button @click="catTab=\'nonkey\'" hx-get="/ar/invoices?' + siteQ + bQ + '" hx-target="#table-data" hx-include="[name=\'search\'],[name=\'limit\'],[name=\'bucket\'],[name=\'sort\'],[name=\'psr\'],[name=\'group\'], [name=\'psr_badge\'], [name=\'ps_only\'], [name=\'keyOnly\'], [name=\'subOnly\']" :class="catTab===\'nonkey\' ? \'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-semibold\' : \'border-b-2 border-transparent text-[#3d3878] dark:text-gray-400 hover:text-indigo-700 dark:hover:text-gray-300 hover:border-indigo-200 dark:hover:border-gray-600\'" class="px-4 py-2 text-xs whitespace-nowrap transition-colors">Non-Key</button>';
             html += '</div>';
             return html;
         })()}
@@ -246,7 +252,7 @@
         <div id="table-data" class="bg-transparent overflow-hidden rounded-b-2xl"
             hx-get="/ar/invoices?${keyOnly ? 'keyOnly=1' : subOnly ? 'subOnly=1' : ''}${bucket ? (keyOnly||subOnly ? '&' : '') + 'bucket=' + bucket : ''}"
             hx-trigger="load"
-            hx-include="[name='site'], [name='sort'], [name='psr'], [name='ps_only']">
+            hx-include="[name='site'], [name='sort'], [name='psr'], [name='ps_only'], [name='keyOnly'], [name='subOnly']">
             <div class="py-16 flex flex-col justify-center items-center text-gray-400 dark:text-gray-500 space-y-3">
                 <svg class="animate-spin w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>

@@ -24,7 +24,7 @@
         <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 border border-violet-200">
             <%= activeGroup %>
             <button hx-get="/ar/invoices" hx-target="#table-data"
-                    hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge']"
+                    hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge'], [name='keyOnly'], [name='subOnly']"
                     onclick="event.stopPropagation()"
                     title="Clear group filter"
                     class="ml-0.5 text-violet-400 hover:text-violet-700 leading-none">&times;</button>
@@ -34,7 +34,7 @@
         <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-green-100 text-green-700 border border-green-200">
             <%= activePsr %>
             <button hx-get="/ar/invoices" hx-target="#table-data"
-                    hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='group']"
+                    hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='group'], [name='keyOnly'], [name='subOnly']"
                     onclick="event.stopPropagation()" title="Clear BDE filter"
                     class="ml-0.5 text-green-400 hover:text-green-700 leading-none">&times;</button>
         </span>
@@ -191,7 +191,7 @@
                 <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950 dark:text-violet-400 dark:border-violet-800 whitespace-nowrap cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900 transition-colors"
                       hx-get="/ar/invoices?group=<%= encodeURIComponent(g.groupName) %>"
                       hx-target="#table-data"
-                      hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge']"
+                      hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge'], [name='keyOnly'], [name='subOnly']"
                       onclick="event.stopPropagation()"
                       title="Filter by this group"><%= g.groupName %></span>
                 <% } else { %>
@@ -205,7 +205,7 @@
                 <span class="inline-flex items-center rounded-md px-1.5 py-px text-[10px] font-medium leading-tight bg-green-50 text-green-700 border border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800 break-words cursor-pointer hover:bg-green-100 dark:hover:bg-green-900 transition-colors"
                       hx-get="/ar/invoices?psr=<%= encodeURIComponent(g.psrName) %>"
                       hx-target="#table-data"
-                      hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='group']"
+                      hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='group'], [name='keyOnly'], [name='subOnly']"
                       onclick="event.stopPropagation(); document.querySelectorAll('[name=psr]').forEach(function(el){ el.checked=false; })"
                       title="Filter by this BDE"><%= g.psrName %></span>
                 <% } else { %>

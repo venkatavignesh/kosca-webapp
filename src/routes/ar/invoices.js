@@ -11,8 +11,9 @@ router.get('/ar/invoices', requireAuth, requireInvoicesAccess, async (req, res) 
     const page = parseInt(req.query.page) || 1;
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 200);
     const search = req.query.search || '';
-    const keyOnly = req.query.keyOnly === '1';
-    const subOnly = req.query.subOnly === '1';
+    // Flatten handles duplicate params (e.g. keyOnly=1 in URL + hx-include hidden input).
+    const keyOnly = [req.query.keyOnly].flat().includes('1');
+    const subOnly = [req.query.subOnly].flat().includes('1');
     const psOnly  = req.query.ps_only === '1';
     const sort = req.query.sort || 'balance_desc';
     const isNameSort = sort === 'name_asc' || sort === 'name_desc';

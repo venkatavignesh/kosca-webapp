@@ -85,7 +85,7 @@
                         <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
-                        Groups
+                        Customer Groups
                     </a>
                 </div>
             </div>
@@ -148,7 +148,7 @@
                         <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
                         </svg>
-                        Categories
+                        Key & Sub D
                     </a>
                     <% } %>
                     <% if (isAdmin || canSiteAssign || canGroupImport) { %>
@@ -258,49 +258,30 @@
                     </a>
                     <% } %>
 
-                    <!-- AR section (collapsible) -->
+                    <!-- AR + Groups (flat links matching desktop) -->
                     <% if (canDirectory) { %>
-                    <div x-data="{ open: <%= arChildActive ? 'true' : 'false' %> }">
-                        <button @click="open = !open"
-                                style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px;width:100%;text-align:left;border:none;cursor:pointer;
-                                       font-weight:<%= arChildActive ? '600' : '500' %>;
-                                       color:<%= arChildActive ? 'var(--text-tertiary)' : 'var(--text-primary)' %>;
-                                       background:<%= arChildActive ? 'var(--surface-tertiary)' : 'transparent' %>;
-                                       margin-bottom:2px">
-                            <svg style="width:15px;height:15px;flex-shrink:0;opacity:0.7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            <span style="flex:1">AR</span>
-                            <svg width="12" height="12" style="flex-shrink:0;transition:transform 0.2s" :style="open ? 'transform:rotate(180deg)' : ''"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </button>
-                        <div x-show="open" x-transition style="padding-left:14px;margin-bottom:2px">
-                            <a href="/ar/directory" @click="$store.nav.open = false"
-                               style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;font-size:13.5px;
-                                      font-weight:<%= cp.startsWith('/ar/directory') ? '600' : '500' %>;
-                                      color:<%= cp.startsWith('/ar/directory') ? 'var(--text-tertiary)' : 'var(--text-primary)' %>;
-                                      background:<%= cp.startsWith('/ar/directory') ? 'var(--surface-tertiary)' : 'transparent' %>;
-                                      text-decoration:none;margin-bottom:2px">
-                                <svg style="width:14px;height:14px;flex-shrink:0;opacity:0.6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                Customers
-                            </a>
-                            <a href="/ar/groups" @click="$store.nav.open = false"
-                               style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;font-size:13.5px;
-                                      font-weight:<%= cp.startsWith('/ar/groups') ? '600' : '500' %>;
-                                      color:<%= cp.startsWith('/ar/groups') ? 'var(--text-tertiary)' : 'var(--text-primary)' %>;
-                                      background:<%= cp.startsWith('/ar/groups') ? 'var(--surface-tertiary)' : 'transparent' %>;
-                                      text-decoration:none;margin-bottom:2px">
-                                <svg style="width:14px;height:14px;flex-shrink:0;opacity:0.6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                </svg>
-                                Groups
-                            </a>
-                        </div>
-                    </div>
+                    <a href="/ar/directory" @click="$store.nav.open = false"
+                       style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px;
+                              font-weight:<%= cp.startsWith('/ar/directory') ? '600' : '500' %>;
+                              color:<%= cp.startsWith('/ar/directory') ? 'var(--text-tertiary)' : 'var(--text-primary)' %>;
+                              background:<%= cp.startsWith('/ar/directory') ? 'var(--surface-tertiary)' : 'transparent' %>;
+                              text-decoration:none;margin-bottom:2px">
+                        <svg style="width:15px;height:15px;flex-shrink:0;opacity:0.7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        AR
+                    </a>
+                    <a href="/ar/groups" @click="$store.nav.open = false"
+                       style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px;
+                              font-weight:<%= cp.startsWith('/ar/groups') ? '600' : '500' %>;
+                              color:<%= cp.startsWith('/ar/groups') ? 'var(--text-tertiary)' : 'var(--text-primary)' %>;
+                              background:<%= cp.startsWith('/ar/groups') ? 'var(--surface-tertiary)' : 'transparent' %>;
+                              text-decoration:none;margin-bottom:2px">
+                        <svg style="width:15px;height:15px;flex-shrink:0;opacity:0.7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                        Customer Groups
+                    </a>
                     <% } %>
 
                     <!-- Pending Settlement -->
@@ -377,7 +358,7 @@
                                 <svg style="width:14px;height:14px;flex-shrink:0;opacity:0.6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
                                 </svg>
-                                Categories
+                                Key & Sub D
                             </a>
                             <% } %>
                             <% if (isAdmin) { %>
@@ -440,20 +421,17 @@
                 <!-- Sync info -->
                 <% if (locals.syncInfo) { %>
                 <% const _si = locals.syncInfo; %>
-                <% if (_si.arImportedAt || _si.cmImportedAt) { %>
-                <div style="padding:8px 16px;border-top:1px solid var(--border-subtle);display:flex;gap:16px">
-                    <% if (_si.arImportedAt) { %>
-                    <div>
-                        <div style="font-size:8px;font-weight:700;color:var(--accent-secondary);text-transform:uppercase;letter-spacing:0.05em">AR</div>
-                        <div style="font-size:10px;font-weight:500;color:var(--text-tertiary)"><%= _si.arImportedAt %></div>
+                <% const _siParts = []; if (_si.arImportedAt) _siParts.push('AR: ' + _si.arImportedAt); if (_si.cmImportedAt) _siParts.push('CM: ' + _si.cmImportedAt); if (_si.psImportedAt) _siParts.push('PS: ' + _si.psImportedAt); %>
+                <% if (_siParts.length) { %>
+                <div style="padding:8px 16px;border-top:1px solid var(--border-subtle);display:flex;align-items:flex-start;gap:8px">
+                    <svg style="width:13px;height:13px;flex-shrink:0;margin-top:1px;color:var(--text-muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <div style="display:flex;flex-direction:column;gap:2px">
+                        <% _siParts.forEach(function(part){ %>
+                        <div style="font-size:10px;font-weight:500;color:var(--text-muted);line-height:1.4"><%= part %></div>
+                        <% }); %>
                     </div>
-                    <% } %>
-                    <% if (_si.cmImportedAt) { %>
-                    <div>
-                        <div style="font-size:8px;font-weight:700;color:var(--accent-secondary);text-transform:uppercase;letter-spacing:0.05em">CM</div>
-                        <div style="font-size:10px;font-weight:500;color:var(--text-tertiary)"><%= _si.cmImportedAt %></div>
-                    </div>
-                    <% } %>
                 </div>
                 <% } %>
                 <% } %>

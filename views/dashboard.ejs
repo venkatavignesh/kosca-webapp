@@ -41,9 +41,6 @@
             var p = catPalette[i % catPalette.length];
             html += card(cat.link, p.accent, p.label, p.bg, cat.label, cat.metrics.total.amount, cat.metrics.total.doors + ' doors');
         });
-        var dispTotal = disputedMetrics ? disputedMetrics.total.amount : '₹0';
-        var dispDoors = disputedMetrics ? disputedMetrics.total.doors : 0;
-        html += card('/ar/directory?disputed=1', 'var(--cat-red-accent)', 'var(--cat-red-label)', 'var(--cat-red-bg)', 'Disputed', dispTotal, dispDoors + ' doors');
         if (typeof groupCount !== 'undefined' && groupCount > 0) {
             html += '<a href="/ar/groups?tab=nonkey" style="text-decoration:none;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--cat-groups-bg);border:1px solid var(--cat-violet-accent);transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.12)\'" onmouseout="this.style.boxShadow=\'\'">'
                 + '<div style="height:3px;background:var(--cat-violet-accent)"></div>'
@@ -54,6 +51,9 @@
                 + '</div>'
                 + '</a>';
         }
+        var dispTotal = disputedMetrics ? disputedMetrics.total.amount : '₹0';
+        var dispDoors = disputedMetrics ? disputedMetrics.total.doors : 0;
+        html += card('/ar/directory?disputed=1', 'var(--cat-red-accent)', 'var(--cat-red-label)', 'var(--cat-red-bg)', 'Disputed', dispTotal, dispDoors + ' doors');
         html += '</div>';
         return html;
     })() : ''}
