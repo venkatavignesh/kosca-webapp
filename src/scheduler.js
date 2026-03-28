@@ -1,5 +1,6 @@
 const { uploadQueue } = require('./queue');
 const prisma = require('./prisma');
+const logger = require('./logger');
 
 async function purgeSettledInvoices() {
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
@@ -7,22 +8,22 @@ async function purgeSettledInvoices() {
         where: { status: 'SETTLED', settledAt: { lt: threeDaysAgo } }
     });
     if (result.count > 0) {
-        console.log(`[Purge] Deleted ${result.count} settled invoices older than 3 days.`);
+        logger.info({ count: result.count }, 'Purged settled invoices older than 3 days');
     }
 }
 
 async function setupScheduler() {
     // Run purge immediately on startup, then every 24 hours
-    purgeSettledInvoices().catch(e => console.error('[Purge] Error:', e));
+    purgeSettledInvoices().catch(e => logger.error({ err: e }, 'Purge failed'));
     setInterval(() => {
-        purgeSettledInvoices().catch(e => console.error('[Purge] Error:', e));
+        purgeSettledInvoices().catch(e => logger.error({ err: e }, 'Purge failed'));
     }, 24 * 60 * 60 * 1000);
     const AR_REPORT_PATH = process.env.AR_REPORT_PATH;
     const CUSTOMER_MASTER_PATH = process.env.CUSTOMER_MASTER_PATH;
     const PENDING_SETTLEMENT_PATH = process.env.PENDING_SETTLEMENT_PATH;
 
     if (!AR_REPORT_PATH && !CUSTOMER_MASTER_PATH && !PENDING_SETTLEMENT_PATH) {
-        console.log('[Scheduler] No auto-sync paths configured. Set AR_REPORT_PATH, CUSTOMER_MASTER_PATH, and/or PENDING_SETTLEMENT_PATH in .env to enable.');
+        logger.info('No auto-sync paths configured');
         return;
     }
 
@@ -38,7 +39,7 @@ async function setupScheduler() {
             { filePath: AR_REPORT_PATH, type: 'ar_report', keepFile: true },
             { repeat: { pattern: '10,40 * * * *' } }
         );
-        console.log(`[Scheduler] AR Report auto-sync scheduled every 30 minutes from: ${AR_REPORT_PATH}`);
+        logger.info({ path: AR_REPORT_PATH }, 'AR Report auto-sync scheduled (every 30 min)');
     }
 
     if (CUSTOMER_MASTER_PATH) {
@@ -47,7 +48,7 @@ async function setupScheduler() {
             { filePath: CUSTOMER_MASTER_PATH, type: 'customer_master', keepFile: true },
             { repeat: { pattern: '10,40 * * * *' } }
         );
-        console.log(`[Scheduler] Customer Master auto-sync scheduled every 30 minutes from: ${CUSTOMER_MASTER_PATH}`);
+        logger.info({ path: CUSTOMER_MASTER_PATH }, 'Customer Master auto-sync scheduled (every 30 min)');
     }
 
     if (PENDING_SETTLEMENT_PATH) {
@@ -56,7 +57,7 @@ async function setupScheduler() {
             { filePath: PENDING_SETTLEMENT_PATH, type: 'pending_settlement', keepFile: true },
             { repeat: { pattern: '10,40 * * * *' } }
         );
-        console.log(`[Scheduler] Pending Settlement auto-sync scheduled every 30 minutes from: ${PENDING_SETTLEMENT_PATH}`);
+        logger.info({ path: PENDING_SETTLEMENT_PATH }, 'Pending Settlement auto-sync scheduled (every 30 min)');
     }
 }
 

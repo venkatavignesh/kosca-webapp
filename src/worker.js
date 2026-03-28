@@ -4,6 +4,7 @@ const prisma = require('./prisma');
 const { connection } = require('./queue');
 const fs = require('fs');
 const path = require('path');
+const logger = require('./logger');
 
 // Unambiguous customer code prefix → site name mappings.
 // Ambiguous prefixes (CMB, MDR, MDI, CBT, VCH, VJY, VZG) are intentionally
@@ -84,7 +85,7 @@ async function processARReport(data, job) {
     await job.updateProgress(25);
 
     if (invoices.length === 0) {
-        console.log('No matching invoices found in file.');
+        logger.info('No matching invoices found in file');
         return;
     }
 
@@ -120,7 +121,7 @@ async function processARReport(data, job) {
         await job.updateProgress(progress);
     }
 
-    console.log(`AR sync complete: ${upsertedCount} invoices upserted.`);
+    logger.info({ upsertedCount }, 'AR sync complete');
 
     // Write daily snapshots per customer
     const customerAgg = new Map();
@@ -148,7 +149,7 @@ async function processARReport(data, job) {
             })
         ));
     }
-    console.log(`Snapshots written for ${customerAgg.size} customers.`);
+    logger.info({ customerCount: customerAgg.size }, 'Snapshots written');
 
     // Sync customer names into CustomerGroup for any grouped codes present in this upload
     const uploadedCodes = Array.from(customerAgg.keys());
@@ -163,7 +164,7 @@ async function processARReport(data, job) {
                 data: { customerName: customerAgg.get(g.customerCode)?.customerName }
             }))
         );
-        console.log(`Updated customer names for ${groupedEntries.length} grouped customers.`);
+        logger.info({ count: groupedEntries.length }, 'Updated customer names for grouped customers');
     }
 
     // Sync PSR names into CustomerMaster
@@ -179,7 +180,7 @@ async function processARReport(data, job) {
                 })
             ));
         }
-        console.log(`PSR names synced for ${psrByCustomer.size} customers.`);
+        logger.info({ count: psrByCustomer.size }, 'PSR names synced');
     }
 }
 
@@ -239,7 +240,7 @@ async function processCustomerMaster(data, job) {
         await job.updateProgress(40 + Math.floor((count / total) * 59));
     }
 
-    console.log(`Customer Master sync complete: ${count} records upserted.`);
+    logger.info({ upsertedCount: count }, 'Customer Master sync complete');
 }
 
 async function processPendingSettlement(data, job) {
@@ -279,7 +280,7 @@ async function processPendingSettlement(data, job) {
     await job.updateProgress(25);
 
     if (records.length === 0) {
-        console.log('[PendingSettlement] No KOSCA DISTRIBUTION LLP rows found.');
+        logger.info('No KOSCA DISTRIBUTION LLP rows found in pending settlement file');
         return;
     }
 
@@ -294,14 +295,14 @@ async function processPendingSettlement(data, job) {
         await job.updateProgress(40 + Math.floor((count / records.length) * 59));
     }
 
-    console.log(`[PendingSettlement] Sync complete: ${count} records inserted.`);
+    logger.info({ insertedCount: count }, 'Pending settlement sync complete');
 }
 
 const worker = new Worker('ExcelUploads', async job => {
     const { filePath, type = 'ar_report', keepFile = false } = job.data;
     const absolutePath = path.resolve(filePath);
 
-    console.log(`Processing job ${job.id} [type: ${type}] for file: ${absolutePath}`);
+    logger.info({ jobId: job.id, type, filePath: absolutePath }, 'Processing job');
     await job.updateProgress(5);
 
     try {
@@ -330,11 +331,11 @@ const worker = new Worker('ExcelUploads', async job => {
             if (_headers.some((h, i) => obj[h] !== '' && obj[h] !== null && obj[h] !== undefined)) data.push(obj);
         });
 
-        console.log(`Parsed ${data.length} rows from Excel file.`);
+        logger.info({ rowCount: data.length }, 'Parsed rows from Excel file');
         await job.updateProgress(15);
 
         if (data.length === 0) {
-            console.log('No data found in Excel sheet.');
+            logger.info('No data found in Excel sheet');
             return;
         }
 
@@ -355,15 +356,15 @@ const worker = new Worker('ExcelUploads', async job => {
         await job.updateProgress(100);
 
     } catch (err) {
-        console.error(`Failed to process job ${job.id}:`, err);
+        logger.error({ err, jobId: job.id }, 'Failed to process job');
         throw err;
     } finally {
         if (!keepFile && fs.existsSync(absolutePath)) {
             try {
                 fs.unlinkSync(absolutePath);
-                console.log(`Cleaned up temp file: ${absolutePath}`);
+                logger.info({ filePath: absolutePath }, 'Cleaned up temp file');
             } catch (err) {
-                console.error(`Could not delete file ${absolutePath}:`, err);
+                logger.error({ err, filePath: absolutePath }, 'Could not delete temp file');
             }
         }
     }
@@ -371,7 +372,7 @@ const worker = new Worker('ExcelUploads', async job => {
 }, { connection });
 
 worker.on('failed', (job, err) => {
-    console.error(`Job ${job.id} has failed with ${err.message}`);
+    logger.error({ err, jobId: job.id }, 'Job failed');
 });
 
-console.log('Worker is running and listening for ExcelUploads...');
+logger.info('Worker is running and listening for ExcelUploads');

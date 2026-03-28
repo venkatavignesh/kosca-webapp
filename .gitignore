@@ -11,5 +11,6 @@ build/
 .pnpm-store/
 playwright-report/
 test-results/
+coverage/
 .superpowers/
 .claude/
