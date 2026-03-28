@@ -42,8 +42,8 @@
             html += card(cat.link, p.accent, p.label, p.bg, cat.label, cat.metrics.total.amount, cat.metrics.total.doors + ' doors');
         });
         if (typeof groupCount !== 'undefined' && groupCount > 0) {
-            html += '<a href="/ar/groups?tab=nonkey" style="text-decoration:none;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--cat-groups-bg);border:1px solid var(--cat-violet-accent);transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.12)\'" onmouseout="this.style.boxShadow=\'\'">'
-                + '<div style="height:3px;background:var(--cat-violet-accent)"></div>'
+            html += '<a href="/ar/groups?tab=nonkey" style="text-decoration:none;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:var(--cat-groups-bg);border:1px solid var(--cat-groups-accent);transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.12)\'" onmouseout="this.style.boxShadow=\'\'">'
+                + '<div style="height:3px;background:var(--cat-groups-accent)"></div>'
                 + '<div style="padding:10px 8px 12px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center">'
                 + '<div style="font-size:clamp(9px,0.75vw,11px);font-weight:700;color:var(--cat-groups-label);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;line-height:1.3">Groups</div>'
                 + '<div style="font-size:clamp(16px,1.6vw,21px);font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1">' + groupCount + '</div>'
@@ -103,7 +103,7 @@
             --cat-violet-accent: #a78bfa; --cat-violet-label: #5b21b6; --cat-violet-bg: rgba(167,139,250,0.08);
             --cat-slate-accent: #64748b; --cat-slate-label: #334155; --cat-slate-bg: rgba(100,116,139,0.08);
             --cat-red-accent: #ef4444; --cat-red-label: #b91c1c; --cat-red-bg: rgba(239,68,68,0.08);
-            --cat-groups-label: #5b21b6; --cat-groups-bg: rgba(167,139,250,0.08);
+            --cat-groups-accent: #14b8a6; --cat-groups-label: #0f766e; --cat-groups-bg: rgba(20,184,166,0.08);
             --br-0: #6366f1; --br-0-bg: rgba(99,102,241,0.08);
             --br-1: #22c55e; --br-1-bg: rgba(34,197,94,0.08);
             --br-2: #f59e0b; --br-2-bg: rgba(245,158,11,0.08);
@@ -132,7 +132,7 @@
             --cat-violet-accent: #a78bfa; --cat-violet-label: #c4b5fd; --cat-violet-bg: rgba(167,139,250,0.15);
             --cat-slate-accent: #94a3b8; --cat-slate-label: #cbd5e1; --cat-slate-bg: rgba(148,163,184,0.15);
             --cat-red-accent: #e56565; --cat-red-label: #f09898; --cat-red-bg: rgba(229,101,101,0.15);
-            --cat-groups-label: #b8aaf0; --cat-groups-bg: rgba(167,139,250,0.15);
+            --cat-groups-accent: #2dd4bf; --cat-groups-label: #5eead4; --cat-groups-bg: rgba(45,212,191,0.15);
             --br-0: #7578e8; --br-0-bg: rgba(117,120,232,0.15);
             --br-1: #3dcc72; --br-1-bg: rgba(61,204,114,0.15);
             --br-2: #e8b030; --br-2-bg: rgba(232,176,48,0.15);

@@ -144,7 +144,7 @@
         <% var invIdx = 0; %>
         <% invoices.forEach(function(inv) {
             invIdx++;
-            const invRowBase = invIdx % 2 === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-[var(--surface-primary)]';
+            const invRowBase = invIdx % 2 === 0 ? 'bg-[var(--table-row-alt)]' : 'bg-white dark:bg-[var(--surface-primary)]';
             let badgeColor='bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
             if (inv.agingDays > 90) badgeColor = 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400';
             else if (inv.agingDays > 60) badgeColor = 'bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-400';

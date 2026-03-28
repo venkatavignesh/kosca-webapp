@@ -46,7 +46,7 @@
                 ? '<div class="py-12 text-center text-gray-400 dark:text-gray-500 text-sm">No pending settlement records found' + (search ? ' for &ldquo;' + search + '&rdquo;' : '') + '.</div>'
                 : (() => {
                     var rows = groups.map(function(g, idx) {
-                        var rowBase = idx % 2 === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-[var(--surface-primary)]';
+                        var rowBase = idx % 2 === 0 ? 'bg-[var(--table-row-alt)]' : 'bg-white dark:bg-[var(--surface-primary)]';
                         var totalStr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(g.totalAmount);
 
                         var childRows = g.records.map(function(r) {
@@ -96,7 +96,7 @@
                             + '</tr>'
                             // Expanded panel
                             + '<tr x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="border-b-2 border-indigo-100 dark:border-indigo-800">'
-                            +   '<td colspan="5" class="p-0 px-1 sm:px-5 pb-3 pt-1 bg-indigo-50/20 dark:bg-indigo-900/10">'
+                            +   '<td colspan="5" class="p-0 px-1 sm:px-5 pb-3 pt-1 bg-indigo-50/20 dark:bg-indigo-900/20">'
                             +     '<div class="border-l-4 border-indigo-300 dark:border-indigo-600 rounded-b-lg overflow-hidden bg-white dark:bg-[var(--surface-primary)] shadow-sm">'
                             +       '<table class="w-full text-xs"><colgroup><col style="width:15%"><col style="width:35%"><col style="width:25%"><col style="width:25%"></colgroup>'
                             +       '<thead><tr class="bg-gray-50 dark:bg-gray-800/80 border-b border-gray-100 dark:border-gray-700">'
