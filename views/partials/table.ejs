@@ -187,14 +187,14 @@
             </td>
 
             <!-- Group -->
-            <td class="col-grp px-3 py-2.5 text-center">
+            <td class="col-grp px-3 py-2.5 text-center overflow-hidden">
                 <% if (g.groupName) { %>
-                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950 dark:text-violet-400 dark:border-violet-800 whitespace-nowrap cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900 transition-colors"
+                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950 dark:text-violet-400 dark:border-violet-800 max-w-full truncate cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900 transition-colors"
                       hx-get="/ar/invoices?group=<%= encodeURIComponent(g.groupName) %>"
                       hx-target="#table-data"
                       hx-include="[name='search'],[name='limit'],[name='site'],[name='sort'],[name='psr'],[name='psr_badge'], [name='keyOnly'], [name='subOnly']"
                       onclick="event.stopPropagation()"
-                      title="Filter by this group"><%= g.groupName %></span>
+                      title="<%= g.groupName %>"><%= g.groupName %></span>
                 <% } else { %>
                 <span class="text-[10px] text-gray-300">—</span>
                 <% } %>
