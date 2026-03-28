@@ -22,10 +22,11 @@ services:
   redis:
     image: redis:7-alpine
     container_name: kosca_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-changeme}
     ports:
       - "6381:6379"
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -40,8 +41,9 @@ services:
       - "3001:3000"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-kosca_ar}?schema=public
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379
       - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET}
       - AR_REPORT_PATH=${AR_REPORT_PATH:-}
       - CUSTOMER_MASTER_PATH=${CUSTOMER_MASTER_PATH:-}
       - PENDING_SETTLEMENT_PATH=${PENDING_SETTLEMENT_PATH:-}
@@ -56,6 +58,17 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
     command: >
       sh -c "pnpm prisma generate && pnpm prisma db push && pnpm run ${NPM_SCRIPT:-dev}"
 
@@ -66,7 +79,7 @@ services:
     container_name: kosca_worker
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-kosca_ar}?schema=public
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379
       - AR_REPORT_PATH=${AR_REPORT_PATH:-}
       - CUSTOMER_MASTER_PATH=${CUSTOMER_MASTER_PATH:-}
       - PENDING_SETTLEMENT_PATH=${PENDING_SETTLEMENT_PATH:-}
@@ -78,11 +91,14 @@ services:
       - ./uploads:/app/uploads
       - /home/koscait/Reports:/home/koscait/Reports:ro
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
+      web:
         condition: service_healthy
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
     command: >
       sh -c "pnpm prisma generate && pnpm run worker:dev"
 

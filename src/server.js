@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
+const pinoHttp = require('pino-http');
+const logger = require('./logger');
 const routes = require('./routes');
 require('dotenv').config();
 
@@ -13,15 +15,24 @@ app.use(helmet({
         useDefaults: false,
         directives: {
             defaultSrc: ["'self'"],
+            // unsafe-inline + unsafe-eval required: Tailwind CDN uses eval() for config,
+            // Alpine.js uses inline event handlers (@click). To remove these, migrate to
+            // a local Tailwind build and Alpine CSP-compatible build.
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://cdn.jsdelivr.net"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:"],
             connectSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            frameAncestors: ["'self'"],
         }
     },
     crossOriginEmbedderPolicy: false,
-    hsts: false,
+    hsts: process.env.NODE_ENV === 'production'
+        ? { maxAge: 31536000, includeSubDomains: true }
+        : false,
 }));
 
 // Set up ejs view engine
@@ -33,6 +44,14 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Request logging
+app.use(pinoHttp({
+    logger,
+    autoLogging: {
+        ignore: (req) => req.url === '/health'
+    },
+}));
+
 const session = require('express-session');
 const RedisStore = require('connect-redis').default;
 const Redis = require('ioredis');
@@ -40,13 +59,14 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const assignmentRoutes = require('./routes/assignments');
 const { injectUserToLocals } = require('./middleware/auth');
+const { csrfProtection } = require('./middleware/csrf');
 const { setupScheduler } = require('./scheduler');
 
 // Initialize Redis client for sessions
 const redisClient = new Redis(process.env.REDIS_URL || 'redis://redis:6379');
 
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
-redisClient.on('connect', () => console.log('Redis Client Connected'));
+redisClient.on('error', (err) => logger.error({ err }, 'Redis client error'));
+redisClient.on('connect', () => logger.info('Redis client connected'));
 
 // If a reverse proxy (nginx, Traefik) is placed in front of this server,
 // add: app.set('trust proxy', 1)
@@ -89,6 +109,9 @@ app.get('/health', async (req, res) => {
 // Apply User Injector to all views
 app.use(injectUserToLocals);
 
+// CSRF protection (after session + body parsing, before routes)
+app.use(csrfProtection);
+
 // Authentication Routes
 app.use('/', authRoutes);
 
@@ -103,27 +126,27 @@ app.use('/ar/assignments', assignmentRoutes);
 
 // Error Fallback
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    logger.error({ err, url: req.url, method: req.method }, 'Unhandled error');
     res.status(500).send('Something broke!');
 });
 
 const server = app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-    setupScheduler().catch(err => console.error('[Scheduler] Setup failed:', err));
+    logger.info({ port: PORT }, 'Server listening');
+    setupScheduler().catch(err => logger.error({ err }, 'Scheduler setup failed'));
 });
 
 // Graceful shutdown
 function gracefulShutdown(signal) {
-    console.log(`${signal} received. Shutting down gracefully...`);
+    logger.info({ signal }, 'Shutting down gracefully');
     server.close(() => {
-        console.log('HTTP server closed.');
+        logger.info('HTTP server closed');
         redisClient.quit().then(() => {
-            console.log('Redis connection closed.');
+            logger.info('Redis connection closed');
             process.exit(0);
         });
     });
     setTimeout(() => {
-        console.error('Forced shutdown after timeout.');
+        logger.error('Forced shutdown after timeout');
         process.exit(1);
     }, 10000);
 }

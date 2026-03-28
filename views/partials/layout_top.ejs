@@ -12,6 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= locals.pageTitle || 'Kosca Distribution LLP' %></title>
     <meta name="robots" content="noindex, nofollow">
+    <meta name="csrf-token" content="<%= locals.csrfToken || '' %>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -45,6 +46,35 @@
     </script>
     <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script>
+        // CSRF: auto-inject token into fetch() and form submissions
+        (function(){
+            var _of = window.fetch;
+            window.fetch = function(url, opts){
+                var m = document.querySelector('meta[name="csrf-token"]');
+                if(m && typeof url === 'string' && url.startsWith('/')){
+                    opts = Object.assign({}, opts);
+                    if(opts.headers instanceof Headers){
+                        if(!opts.headers.has('X-CSRF-Token')) opts.headers.set('X-CSRF-Token', m.content);
+                    } else {
+                        opts.headers = Object.assign({'X-CSRF-Token': m.content}, opts.headers || {});
+                    }
+                }
+                return _of.call(this, url, opts);
+            };
+            // Auto-inject hidden _csrf input on form submit
+            document.addEventListener('submit', function(e){
+                var m = document.querySelector('meta[name="csrf-token"]');
+                if(!m) return;
+                var f = e.target;
+                if(f.method && f.method.toUpperCase() === 'POST' && !f.querySelector('input[name="_csrf"]')){
+                    var i = document.createElement('input');
+                    i.type = 'hidden'; i.name = '_csrf'; i.value = m.content;
+                    f.appendChild(i);
+                }
+            }, true);
+        })();
+    </script>
+    <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('nav', { open: false });
             Alpine.store('theme', {
@@ -67,6 +97,11 @@
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script>
+        // CSRF: auto-inject token into HTMX requests
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            var m = document.querySelector('meta[name="csrf-token"]');
+            if (m) evt.detail.headers['X-CSRF-Token'] = m.content;
+        });
         document.addEventListener('htmx:afterSwap', function(event) {
             if (typeof Alpine === 'undefined') return;
             Alpine.initTree(event.detail.target);
@@ -128,6 +163,7 @@
             --input-text: #111827;
             --badge-bg: #f0eff9;
             --badge-text: #4d47a8;
+            --table-row-alt: #f3f4f6;
         }
         .dark {
             --page-bg: #161b22;
@@ -138,10 +174,10 @@
             --surface-tertiary: #21262d;
             --text-primary: #e6edf3;
             --text-secondary: #c9d1d9;
-            --text-tertiary: #b1bac4;
+            --text-tertiary: #cdd5de;
             --text-muted: #8b949e;
             --text-light: #8b949e;
-            --border-primary: #30363d;
+            --border-primary: #374151;
             --border-secondary: #3d444d;
             --border-subtle: #21262d;
             --accent-primary: #8b7fd4;
@@ -167,6 +203,7 @@
             --input-text: #e6edf3;
             --badge-bg: #262c36;
             --badge-text: #b8b0e0;
+            --table-row-alt: #22272e;
         }
         @media print {
             :root, .dark {

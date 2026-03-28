@@ -61,6 +61,7 @@
                 <% } %>
 
                 <form class="space-y-5" action="/login" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
                         <div class="relative">
