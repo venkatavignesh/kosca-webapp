@@ -4,14 +4,15 @@ const prisma = require('../prisma');
 const bcrypt = require('bcrypt');
 const rateLimit = require('express-rate-limit');
 const logger = require('../logger');
+const { validate, loginSchema } = require('../validation');
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10,                   // 10 attempts per window per IP
+    max: 10, // 10 attempts per window per IP
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many login attempts. Please try again in 15 minutes.' },
-    skipSuccessfulRequests: true
+    skipSuccessfulRequests: true,
 });
 
 // Render login page
@@ -66,7 +67,6 @@ router.post('/login', loginLimiter, async (req, res) => {
 
         // Fallback for user with no modules
         res.redirect('/');
-
     } catch (error) {
         logger.error({ err: error, route: 'POST /login' }, 'Login error');
         res.render('login', { error: 'An internal server error occurred.' });

@@ -1,29 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { requireRole, requireAuth, requireModule } = require('../middleware/auth');
-const prisma = require('../prisma');
-const bcrypt = require('bcrypt');
-const multer = require('multer');
+const { requireModule } = require('../../middleware/auth');
+const prisma = require('../../prisma');
 const ExcelJS = require('exceljs');
-const path   = require('path');
-const fs     = require('fs');
-const logger = require('../logger');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const logger = require('../../logger');
 
-const uploadsDir = path.join(__dirname, '../../uploads');
-const publicDir  = path.join(__dirname, '../../public');
-
-const logoUpload = multer({
-    storage: multer.diskStorage({
-        destination: (_, __, cb) => cb(null, publicDir),
-        filename:    (_, __, cb) => cb(null, 'kosca-logo.png')
-    }),
-    fileFilter: (_, f, cb) => {
-        const ext = path.extname(f.originalname).toLowerCase();
-        const allowed = ['.png', '.jpg', '.jpeg', '.webp'];
-        allowed.includes(ext) ? cb(null, true) : cb(new Error('Only image files are allowed'));
-    },
-    limits: { fileSize: 2 * 1024 * 1024 } // 2 MB
-});
+const uploadsDir = path.join(__dirname, '../../../uploads');
 
 function safeUploadPath(filePath) {
     if (!filePath || typeof filePath !== 'string' || !filePath.trim()) {
@@ -55,322 +40,8 @@ const groupUpload = multer({
     limits: { fileSize: 250 * 1024 * 1024 } // 250 MB
 });
 
-// All admin routes require authentication
-router.use(requireAuth);
-
-// Shorthand middleware groups
-const adminOnly = requireRole(['ADMIN']);
-const canManageKeyAccounts    = requireModule('admin_key_accounts');
-const canManageSubDistributors = requireModule('admin_sub_distributors');
-const { KEY_ACCOUNT_PREFIXES, SUB_DISTRIBUTOR_CODES, getKeyAccountCodes } = require('../config/categories');
-const canManageGroups         = requireModule('ar_groups');
-const canManageSiteAssignments = requireModule('admin_site_assignments');
-const canManageGroupImport     = requireModule('admin_group_import');
-
-// Render the users management dashboard
-router.get('/users', adminOnly, async (req, res) => {
-    try {
-        const users = await prisma.user.findMany({
-            orderBy: { createdAt: 'desc' }
-        });
-        res.render('admin/users', { users });
-    } catch (error) {
-        logger.error({ err: error, route: 'GET /admin/users' }, 'Error fetching users');
-        res.status(500).render('error', {
-            message: 'Internal Server Error',
-            details: 'Could not fetch users list from database.'
-        });
-    }
-});
-
-// Create a new user
-router.post('/users', adminOnly, async (req, res) => {
-    try {
-        const { name, email, password, role, modules } = req.body;
-
-        let assignedModules = [];
-        if (modules) {
-            // handle single or multiple checkbox values
-            assignedModules = Array.isArray(modules) ? modules : [modules];
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                role: role || 'USER',
-                modules: assignedModules
-            }
-        });
-
-        res.redirect('/admin/users');
-    } catch (error) {
-        if (error.code === 'P2002') {
-            return res.status(400).render('error', {
-                message: 'User Creation Failed',
-                details: 'A user with that email already exists.'
-            });
-        }
-        res.status(500).send('Error creating user');
-    }
-});
-
-// Edit a user
-router.post('/users/:id/edit', adminOnly, async (req, res) => {
-    try {
-        const userId = req.params.id;
-        const { name, email, password, role, modules } = req.body;
-
-        let assignedModules = [];
-        if (modules) {
-            assignedModules = Array.isArray(modules) ? modules : [modules];
-        }
-
-        const updateData = {
-            name,
-            email,
-            role,
-            modules: assignedModules
-        };
-
-        // If a password was provided, we hash and insert it otherwise keep the old one
-        if (password && password.trim() !== '') {
-            updateData.password = await bcrypt.hash(password, 10);
-        }
-
-        await prisma.user.update({
-            where: { id: userId },
-            data: updateData
-        });
-
-        res.redirect('/admin/users');
-    } catch (error) {
-        logger.error({ err: error, route: 'POST /admin/users/:id/edit', userId: req.params.id }, 'Error updating user');
-
-        if (error.code === 'P2002') {
-            return res.status(400).render('error', {
-                message: 'User Update Failed',
-                details: 'Another user is already using that email.'
-            });
-        }
-
-        res.status(500).render('error', {
-            message: 'Internal Server Error',
-            details: 'Could not update user information.'
-        });
-    }
-});
-
-// Delete a user
-router.post('/users/:id/delete', adminOnly, async (req, res) => {
-    try {
-        const userId = req.params.id;
-
-        // Prevent admin suicide
-        if (userId === req.session.userId) {
-            return res.status(400).send('You cannot delete your own active admin account.');
-        }
-
-        // Prevent non-ADMIN from deleting ADMIN accounts
-        const targetUser = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
-        if (targetUser?.role === 'ADMIN' && req.session.userRole !== 'ADMIN') {
-            return res.status(403).send('Only admins can delete admin accounts.');
-        }
-
-        await prisma.user.delete({
-            where: { id: userId }
-        });
-
-        res.redirect('/admin/users');
-    } catch (error) {
-        logger.error({ err: error, route: 'POST /admin/users/:id/delete', userId: req.params.id }, 'Error deleting user');
-        res.status(500).send('Error deleting user');
-    }
-});
-
-// ======== CATEGORIES (combined Key Accounts + Sub Distributors — read-only) ========
-
-const canManageCategories = (req, res, next) => {
-    const userModules = req.session.userModules || [];
-    const userRole = req.session.userRole;
-    if (userRole === 'ADMIN' || userModules.includes('admin_key_accounts') || userModules.includes('admin_sub_distributors')) return next();
-    return res.status(403).render('error', { message: 'Forbidden', details: 'You do not have access to this page.' });
-};
-
-router.get('/categories', canManageCategories, async (req, res) => {
-    try {
-        const tab = req.query.tab === 'sub' ? 'sub' : 'key';
-
-        // Fetch key accounts
-        const prefixFilters = KEY_ACCOUNT_PREFIXES.map(p => ({ customerName: { startsWith: p, mode: 'insensitive' } }));
-        const keyRows = await prisma.invoice.findMany({
-            where: { status: 'ACTIVE', OR: prefixFilters },
-            select: { customerCode: true, customerName: true },
-            distinct: ['customerCode'],
-            orderBy: { customerName: 'asc' }
-        });
-        const keyAccounts = keyRows.map(r => ({
-            customerCode: r.customerCode,
-            customerName: r.customerName,
-            matchedPrefix: KEY_ACCOUNT_PREFIXES.find(p => (r.customerName || '').toUpperCase().startsWith(p.toUpperCase())) || ''
-        }));
-        // Group by prefix
-        const keyGroups = {};
-        KEY_ACCOUNT_PREFIXES.forEach(p => { keyGroups[p] = []; });
-        keyAccounts.forEach(ka => { if (keyGroups[ka.matchedPrefix]) keyGroups[ka.matchedPrefix].push(ka); });
-
-        // Fetch sub distributors
-        const [masterRows, invoiceRows] = await Promise.all([
-            prisma.customerMaster.findMany({ where: { customerCode: { in: SUB_DISTRIBUTOR_CODES } }, select: { customerCode: true, customerName: true } }),
-            prisma.invoice.findMany({ where: { customerCode: { in: SUB_DISTRIBUTOR_CODES } }, select: { customerCode: true, customerName: true }, distinct: ['customerCode'] })
-        ]);
-        const nameMap = {};
-        invoiceRows.forEach(r => { if (r.customerName) nameMap[r.customerCode] = r.customerName; });
-        masterRows.forEach(r => { if (r.customerName) nameMap[r.customerCode] = r.customerName; });
-        const subDistributors = SUB_DISTRIBUTOR_CODES.map(code => ({
-            customerCode: code,
-            customerName: nameMap[code] || null
-        }));
-
-        res.render('admin/categories', {
-            tab,
-            keyAccounts, keyGroups, keyTotal: keyAccounts.length,
-            subDistributors, subTotal: subDistributors.length,
-            prefixes: KEY_ACCOUNT_PREFIXES
-        });
-    } catch (error) {
-        logger.error({ err: error, route: 'GET /admin/categories' }, 'Error fetching categories');
-        res.status(500).render('error', { message: 'Internal Server Error', details: 'Could not fetch categories.' });
-    }
-});
-
-// Redirects from old URLs
-router.get('/key-accounts', (req, res) => res.redirect('/admin/categories?tab=key'));
-router.get('/sub-distributors', (req, res) => res.redirect('/admin/categories?tab=sub'));
-
-// ======== SITE ASSIGNMENTS ========
-
-router.get('/site-assignments', canManageSiteAssignments, async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 200);
-        const search = req.query.search || '';
-        const skip = (page - 1) * limit;
-
-        const keyAccountCodes = await getKeyAccountCodes(prisma);
-
-        const searchWhere = search ? {
-            OR: [
-                { customerCode: { contains: search, mode: 'insensitive' } },
-                { customerName: { contains: search, mode: 'insensitive' } }
-            ]
-        } : {};
-
-        const baseWhere = { status: 'ACTIVE', customerCode: { notIn: keyAccountCodes }, ...searchWhere };
-
-        // Get distinct customer codes (paginated)
-        const [customerGroups, totalCount] = await Promise.all([
-            prisma.invoice.groupBy({
-                by: ['customerCode', 'customerName'],
-                where: baseWhere,
-                skip,
-                take: limit,
-                orderBy: { customerCode: 'asc' }
-            }),
-            prisma.invoice.groupBy({ by: ['customerCode'], where: baseWhere }).then(r => r.length)
-        ]);
-
-        const codes = customerGroups.map(c => c.customerCode);
-
-        // Get current site per customer (first invoice's siteName)
-        const siteRows = await prisma.invoice.findMany({
-            where: { customerCode: { in: codes }, status: 'ACTIVE' },
-            select: { customerCode: true, siteName: true },
-            distinct: ['customerCode']
-        });
-        const siteMap = new Map(siteRows.map(r => [r.customerCode, r.siteName]));
-
-        // Overrides take precedence
-        const overrides = await prisma.customerSiteOverride.findMany({
-            where: { customerCode: { in: codes } },
-            select: { customerCode: true, siteName: true }
-        });
-        overrides.forEach(o => siteMap.set(o.customerCode, o.siteName));
-
-        // Available site names
-        const siteNameRows = await prisma.invoice.findMany({
-            where: { status: 'ACTIVE', siteName: { not: null } },
-            select: { siteName: true },
-            distinct: ['siteName']
-        });
-        const siteNames = siteNameRows.map(r => r.siteName).filter(Boolean).sort();
-
-        const customers = customerGroups.map(c => ({
-            customerCode: c.customerCode,
-            customerName: c.customerName,
-            currentSite: siteMap.get(c.customerCode) || 'Unknown'
-        }));
-
-        const totalPages = Math.ceil(totalCount / limit);
-        res.render('admin/site_assignments', { customers, page, totalPages, totalCount, search, limit, siteNames });
-    } catch (error) {
-        logger.error({ err: error, route: 'GET /admin/site-assignments' }, 'Error fetching site assignments');
-        res.status(500).render('error', { message: 'Internal Server Error', details: 'Could not fetch site assignments.' });
-    }
-});
-
-router.post('/site-assignments/:code/move', canManageSiteAssignments, async (req, res) => {
-    try {
-        const customerCode = req.params.code;
-        const { siteName } = req.body;
-        if (!siteName) return res.redirect('/admin/site-assignments');
-
-        await prisma.customerSiteOverride.upsert({
-            where: { customerCode },
-            update: { siteName, setBy: req.session.userName, setAt: new Date() },
-            create: { customerCode, siteName, setBy: req.session.userName }
-        });
-
-        await prisma.invoice.updateMany({
-            where: { customerCode },
-            data: { siteName }
-        });
-
-        res.redirect('/admin/site-assignments');
-    } catch (error) {
-        logger.error({ err: error, route: 'POST /admin/site-assignments/:code/move', customerCode: req.params.code }, 'Error moving customer site');
-        res.status(500).render('error', { message: 'Internal Server Error', details: 'Could not move customer.' });
-    }
-});
-
-// ======== SITE OVERRIDES ========
-
-router.post('/site-overrides', adminOnly, async (req, res) => {
-    try {
-        const { customerCode, siteName } = req.body;
-        if (!customerCode || !siteName) return res.status(400).send('Missing fields');
-
-        await prisma.customerSiteOverride.upsert({
-            where: { customerCode },
-            update: { siteName, setBy: req.session.userName, setAt: new Date() },
-            create: { customerCode, siteName, setBy: req.session.userName }
-        });
-
-        // Apply to all existing invoices for this customer that have no site
-        await prisma.invoice.updateMany({
-            where: { customerCode, siteName: null },
-            data: { siteName }
-        });
-
-        res.redirect('/ar');
-    } catch (error) {
-        logger.error({ err: error, route: 'POST /admin/site-overrides' }, 'Error saving site override');
-        res.status(500).send('Error saving site override');
-    }
-});
+const canManageGroups = requireModule('ar_groups');
+const canManageGroupImport = requireModule('admin_group_import');
 
 // ======== GROUP IMPORT ========
 
@@ -551,7 +222,7 @@ router.post('/group-import/process', canManageGroupImport, async (req, res) => {
         if (filePath) try { fs.unlinkSync(safeUploadPath(filePath)); } catch (_) {}
 
         // Build result HTML
-        const fmt = (n) => '₹' + (n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        const fmt = (n) => '\u20B9' + (n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
         const groupNames = Object.keys(groupMap);
         let groupCardsHtml = '';
@@ -562,7 +233,7 @@ router.post('/group-import/process', canManageGroupImport, async (req, res) => {
             for (const code of codes) {
                 const name = masterMap[code];
                 const inv  = invoiceMap[code];
-                const nameCell = name ? name.replace(/</g, '&lt;') : '<span class="text-gray-400 dark:text-gray-500">—</span>';
+                const nameCell = name ? name.replace(/</g, '&lt;') : '<span class="text-gray-400 dark:text-gray-500">\u2014</span>';
                 const invCell  = inv
                     ? `${fmt(inv.balance)} <span class="text-xs text-gray-400 dark:text-gray-500">(${inv.count} invoice${inv.count !== 1 ? 's' : ''})</span>`
                     : '<span class="text-xs text-gray-400 dark:text-gray-500 italic">No invoices</span>';
@@ -678,24 +349,6 @@ router.post('/groups/:groupName/delete', canManageGroups, async (req, res) => {
         logger.error({ err, route: 'POST /admin/groups/:groupName/delete', groupName: req.params.groupName }, 'Error deleting group');
         res.status(500).send('Failed to delete group.');
     }
-});
-
-// Branding — logo upload
-router.get('/branding', adminOnly, (req, res) => {
-    const logoExists = fs.existsSync(path.join(publicDir, 'kosca-logo.png'));
-    res.render('admin/branding', { logoExists });
-});
-
-router.post('/branding/logo', adminOnly, (req, res) => {
-    logoUpload.single('logo')(req, res, (err) => {
-        if (err) {
-            return res.send(`<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">${err.message}</div>`);
-        }
-        if (!req.file) {
-            return res.send('<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">No file uploaded.</div>');
-        }
-        res.send('<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">Logo updated successfully. <a href="/" class="underline font-semibold">View site</a></div>');
-    });
 });
 
 module.exports = router;
