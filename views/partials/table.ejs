@@ -14,6 +14,7 @@
   var activePsr = (typeof psrs !== 'undefined' && psrs.length === 1) ? psrs[0] : '';
 %>
 <div id="filter-state" style="display:none" data-group="<%= activeGroup %>" data-psr="<%= activePsr %>"></div>
+<% if (activeGroup) { %><input type="hidden" name="group" value="<%= activeGroup %>"><% } %>
 <% if (activePsr) { %><input type="hidden" name="psr_badge" value="<%= activePsr %>"><% } %>
 
 <!-- Count bar -->
