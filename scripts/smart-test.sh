@@ -173,7 +173,7 @@ if [ -n "$UNIT_TESTS" ] && [ "$TIER" != "view" ] && [ "$TIER" != "partial" ]; th
     for TEST_PATH in $UNIT_TESTS; do
         if [ -e "$TEST_PATH" ]; then
             dim "→ $TEST_PATH"
-            if npx jest --testPathPattern="$TEST_PATH" --no-coverage 2>&1; then
+            if npx jest --testPathPatterns "$TEST_PATH" --no-coverage 2>&1; then
                 pass "$TEST_PATH"
             else
                 fail_track "$TEST_PATH"

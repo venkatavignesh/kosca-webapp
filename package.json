@@ -18,20 +18,20 @@
     "format:check": "prettier --check 'src/**/*.js'"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "7.5.0",
-    "@prisma/client": "7.5.0",
+    "@prisma/adapter-pg": "7.6.0",
+    "@prisma/client": "7.6.0",
     "bcrypt": "^6.0.0",
-    "bullmq": "^5.70.1",
-    "connect-redis": "^7.1.1",
+    "bullmq": "^5.71.1",
+    "connect-redis": "^8.0.0",
     "dotenv": "^17.3.1",
-    "ejs": "^4.0.1",
+    "ejs": "^5.0.1",
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.1",
     "express-session": "^1.19.0",
     "helmet": "^8.1.0",
-    "ioredis": "^5.10.0",
-    "multer": "^2.1.0",
+    "ioredis": "^5.10.1",
+    "multer": "^2.1.1",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0"
   },
@@ -41,11 +41,14 @@
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.4.0",
-    "jest": "^29.7.0",
+    "jest": "^30.3.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.1",
-    "prisma": "7.5.0",
+    "prisma": "7.6.0",
     "supertest": "^7.2.2",
     "zod": "^4.3.6"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/engines", "prisma", "bcrypt"]
   }
 }
