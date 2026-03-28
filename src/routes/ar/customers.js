@@ -4,6 +4,7 @@ const router   = express.Router();
 const prisma   = require('../../prisma');
 const ExcelJS  = require('exceljs');
 const { requireAuth, requireModule, requireRole } = require('../../middleware/auth');
+const logger = require('../../logger');
 
 function escHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
@@ -42,7 +43,7 @@ router.post('/ar/customers/:code/dispute', requireAuth, requireModule('ar_direct
             );
         }
     } catch (err) {
-        console.error('Dispute toggle error:', err);
+        logger.error({ err, route: 'POST /ar/customers/:code/dispute', customerCode: req.params.code }, 'Dispute toggle error');
         res.status(500).send('Error');
     }
 });
@@ -89,7 +90,7 @@ router.get('/ar/customers/:code/export', requireAuth, requireModule('ar_director
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.send(buf);
     } catch (error) {
-        console.error('Error exporting invoices:', error);
+        logger.error({ err: error, route: 'GET /ar/customers/:code/export', customerCode: req.params.code }, 'Error exporting invoices');
         res.status(500).send('Export failed');
     }
 });
@@ -108,7 +109,7 @@ router.get('/ar/customers/:code/statement', requireAuth, requireModule('ar_direc
         const customerName = cm?.customerName || invoices[0]?.customerName || code;
         res.render('ar/statement', { invoices, customerName, customerCode: code, generatedAt: new Date() });
     } catch (error) {
-        console.error('Error generating statement:', error);
+        logger.error({ err: error, route: 'GET /ar/customers/:code/statement', customerCode: req.params.code }, 'Error generating statement');
         res.status(500).send('Error generating statement');
     }
 });
@@ -126,7 +127,7 @@ router.get('/ar/customer/:code/trend', requireAuth, requireModule('ar_directory'
             : (currentInvoices[0]?.customerName || code);
         res.render('ar/customer_trend', { snapshots, currentInvoices, customerCode: code, customerName });
     } catch (error) {
-        console.error('Error fetching trend:', error);
+        logger.error({ err: error, route: 'GET /ar/customer/:code/trend', customerCode: req.params.code }, 'Error fetching trend');
         res.status(500).send('Error loading trend data');
     }
 });
@@ -144,7 +145,7 @@ router.put('/ar/customers/:customerCode/mobile', requireAuth, requireModule('ar_
         const display = mobileNo.trim() || '';
         res.send(`<span id="mobile-display-${customerCode.replace(/[^a-zA-Z0-9]/g, '_')}" class="text-[10px] text-indigo-500 font-mono">📞 ${escHtml(display)}</span>`);
     } catch (error) {
-        console.error('Error updating mobile:', error);
+        logger.error({ err: error, route: 'PUT /ar/customers/:customerCode/mobile', customerCode: req.params.customerCode }, 'Error updating mobile');
         res.status(500).send('<span class="text-red-500 text-xs">Error saving</span>');
     }
 });
@@ -167,7 +168,7 @@ router.post('/ar/customers/:customerCode/mobile/fetch', requireAuth, requireModu
         const safeId = customerCode.replace(/[^a-zA-Z0-9]/g, '_');
         res.send(`<a href="tel:${escHtml(cm.masterMobileNo)}" id="mobile-display-${safeId}" class="text-[10px] text-indigo-500 hover:text-indigo-700 font-mono">📞 ${escHtml(cm.masterMobileNo)}</a>`);
     } catch (error) {
-        console.error('Error fetching mobile from master:', error);
+        logger.error({ err: error, route: 'POST /ar/customers/:customerCode/mobile/fetch', customerCode: req.params.customerCode }, 'Error fetching mobile from master');
         res.status(500).send('<span class="text-red-500 text-xs">Error restoring number</span>');
     }
 });
@@ -217,7 +218,7 @@ router.get('/ar/customers/:code/pending-settlement', requireAuth, requireModule(
             </tr></tfoot>
         </table>`);
     } catch (err) {
-        console.error('Error fetching pending settlement:', err);
+        logger.error({ err, route: 'GET /ar/customers/:code/pending-settlement', customerCode: req.params.code }, 'Error fetching pending settlement');
         res.status(500).send('<p class="text-xs text-red-400 py-2 text-center">Error loading records.</p>');
     }
 });

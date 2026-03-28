@@ -4,6 +4,7 @@ const router  = express.Router();
 const prisma  = require('../../prisma');
 const { connection }                     = require('../../queue');
 const { requireAuth, requireModule }     = require('../../middleware/auth');
+const logger = require('../../logger');
 
 router.get('/ar/pending-settlement', requireAuth, requireModule('ar_pending_settlement'), async (req, res) => {
     try {
@@ -45,7 +46,7 @@ router.get('/ar/pending-settlement', requireAuth, requireModule('ar_pending_sett
             g.totalAmount += r.amount;
         }
 
-        const allGroups  = Array.from(groupMap.values());
+        const allGroups  = Array.from(groupMap.values()).sort((a, b) => b.totalAmount - a.totalAmount);
         const total      = allGroups.length;
         const groups     = allGroups.slice(skip, skip + limit);
 
@@ -63,7 +64,7 @@ router.get('/ar/pending-settlement', requireAuth, requireModule('ar_pending_sett
             lastSync: fmtIST(lastPsSyncISO),
         });
     } catch (err) {
-        console.error('[PendingSettlement] Route error:', err);
+        logger.error({ err, route: 'GET /ar/pending-settlement' }, 'Pending settlement route error');
         res.status(500).send('Internal server error');
     }
 });

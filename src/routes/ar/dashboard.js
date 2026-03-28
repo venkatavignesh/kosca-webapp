@@ -5,6 +5,7 @@ const prisma  = require('../../prisma');
 const { connection }             = require('../../queue');
 const { requireAuth, requireModule } = require('../../middleware/auth');
 const { SUB_DISTRIBUTOR_CODES, getKeyAccountCodes } = require('../../config/categories');
+const logger = require('../../logger');
 
 // Render AR Metrics Dashboard
 router.get('/ar', requireAuth, requireModule('ar_dashboard'), async (req, res) => {
@@ -334,7 +335,7 @@ router.get('/ar', requireAuth, requireModule('ar_dashboard'), async (req, res) =
 
         res.render('dashboard', { metrics: formattedMetrics, siteMetrics, keySiteMetrics, subSiteMetrics, keyMetrics, subMetrics, lastUpdated, arImportedAt, arFileDate, cmImportedAt, cmFileDate, unknownCustomers, siteNames, unknownTabIndex, categoryMetrics, recentMetrics, disputedMetrics, groupCount, prevMonthCategories, prevMonthOverall, prevMonthDateLabel });
     } catch (error) {
-        console.error('Error fetching metrics:', error);
+        logger.error({ err: error, route: 'GET /ar' }, 'Error fetching dashboard metrics');
         res.status(500).send('Error loading dashboard metrics');
     }
 });

@@ -3,6 +3,7 @@ const router = express.Router();
 const prisma = require('../prisma');
 const bcrypt = require('bcrypt');
 const rateLimit = require('express-rate-limit');
+const logger = require('../logger');
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -67,7 +68,7 @@ router.post('/login', loginLimiter, async (req, res) => {
         res.redirect('/');
 
     } catch (error) {
-        console.error('Login error:', error);
+        logger.error({ err: error, route: 'POST /login' }, 'Login error');
         res.render('login', { error: 'An internal server error occurred.' });
     }
 });
@@ -76,7 +77,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
-            console.error('Session generic destruction error', err);
+            logger.error({ err, route: 'GET /logout' }, 'Session destruction error');
         }
         res.redirect('/login');
     });

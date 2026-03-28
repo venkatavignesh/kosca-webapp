@@ -4,6 +4,7 @@ const router  = express.Router();
 const prisma  = require('../../prisma');
 const { requireAuth, requireModule } = require('../../middleware/auth');
 const { SUB_DISTRIBUTOR_CODES, getKeyAccountCodes } = require('../../config/categories');
+const logger = require('../../logger');
 
 const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
@@ -97,6 +98,7 @@ router.get('/ar/groups', requireAuth, requireModule('ar_directory'), (req, res) 
 router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async (req, res) => {
     const tab = req.query.tab || 'key';
     const isAdmin = req.session.userRole === 'ADMIN' || (req.session.userModules || []).includes('ar_groups');
+    const canPS = req.session.userRole === 'ADMIN' || (req.session.userModules || []).includes('ar_pending_settlement');
     try {
         // ── Ungrouped tab: non-key, non-sub customers not yet in any group ──
         if (tab === 'ungrouped') {
@@ -128,8 +130,14 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
             ]);
             const invMap = {};
             for (const r of invSummary) invMap[r.customerCode] = { count: r._count._all, balance: r._sum.balanceAmount || 0, maxAging: r._max.agingDays || 0 };
+            ungroupedCodes.sort((a, b) => (invMap[b]?.balance || 0) - (invMap[a]?.balance || 0));
             const mMap = {};
             for (const r of masterRows) mMap[r.customerCode] = r;
+            let psSetUngrouped = new Set();
+            if (canPS) {
+                const psRecs = await prisma.pendingSettlement.findMany({ where: { customerCode: { in: ungroupedCodes } }, select: { customerCode: true }, distinct: ['customerCode'] });
+                psSetUngrouped = new Set(psRecs.map(r => r.customerCode));
+            }
             const fmt = (n) => '₹' + (n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
             const agingBadge = (d) => {
                 if (!d) return '<span class="inline-flex items-center justify-center w-14 text-xs text-gray-300 dark:text-gray-600">—</span>';
@@ -147,7 +155,7 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
                 const aging = inv?.maxAging || 0;
                 rowsHtml += `<tr class="border-b border-gray-100 last:border-0 odd:bg-white odd:dark:bg-[var(--surface-primary)] even:bg-gray-50/60 even:dark:bg-[var(--surface-tertiary)] hover:bg-indigo-50/30 dark:hover:bg-indigo-900/20 cursor-pointer" onclick="window.location.href='/ar/invoices/${encodeURIComponent(code)}'">
   <td class="px-2 py-1.5 whitespace-nowrap"><span class="text-[11px] text-gray-400 dark:text-gray-500 font-mono">${escHtml(code)}</span></td>
-  <td class="px-2 py-1.5"><span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${name}</span></td>
+  <td class="px-2 py-1.5"><div class="flex items-center gap-1.5"><span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${name}</span>${psSetUngrouped.has(code) ? '<span class="inline-flex items-center rounded px-1 py-0.5 text-[8px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800">PS</span>' : ''}</div></td>
   <td class="px-2 py-1.5 text-center whitespace-nowrap"><span class="text-xs font-bold text-gray-900 dark:text-gray-100">${fmt(balance)}</span></td>
   <td class="px-2 py-1.5 text-center whitespace-nowrap"><span class="text-[11px] text-gray-400 dark:text-gray-500">${count}</span></td>
   <td class="px-2 py-1.5 text-center whitespace-nowrap"><div class="inline-flex items-center justify-center gap-2"><a href="/ar/customer/${encodeURIComponent(code)}/trend" onclick="event.stopPropagation()" class="text-indigo-400 hover:text-indigo-600 transition-colors flex-shrink-0" title="View trend"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg></a>${agingBadge(aging)}</div></td>
@@ -185,20 +193,25 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
         }
 
         // ── Grouped tabs (key / sub / non-key) ────────────────────────────
+        // Classify at GROUP level: a group is KEY if ANY member is a key account,
+        // SUB if ANY member is a sub-d code (and not a key group), else NON-KEY.
+        const [keyCodes, allGrouped] = await Promise.all([
+            getKeyAccountCodes(prisma),
+            prisma.customerGroup.findMany({ orderBy: { groupName: 'asc' } })
+        ]);
+        const keyCodeSet = new Set(keyCodes);
+        const subCodeSet = new Set(SUB_DISTRIBUTOR_CODES);
+        const keyGroupNames = new Set(allGrouped.filter(r => keyCodeSet.has(r.customerCode)).map(r => r.groupName));
+        const subGroupNames = new Set(allGrouped.filter(r => subCodeSet.has(r.customerCode) && !keyGroupNames.has(r.groupName)).map(r => r.groupName));
+
         let groupEntries;
         if (tab === 'key') {
-            const keyCodes = await getKeyAccountCodes(prisma);
-            groupEntries = keyCodes.length > 0
-                ? await prisma.customerGroup.findMany({ where: { customerCode: { in: keyCodes } }, orderBy: { groupName: 'asc' } })
-                : [];
+            groupEntries = allGrouped.filter(r => keyGroupNames.has(r.groupName));
         } else if (tab === 'sub') {
-            groupEntries = await prisma.customerGroup.findMany({ where: { customerCode: { in: SUB_DISTRIBUTOR_CODES } }, orderBy: { groupName: 'asc' } });
+            groupEntries = allGrouped.filter(r => subGroupNames.has(r.groupName));
         } else {
-            // Non-key: any grouped customer that is NOT a key account or sub distributor
-            const keyCodes = await getKeyAccountCodes(prisma);
-            const excludeSet = new Set([...keyCodes, ...SUB_DISTRIBUTOR_CODES]);
-            const allGrouped = await prisma.customerGroup.findMany({ orderBy: { groupName: 'asc' } });
-            groupEntries = allGrouped.filter(r => !excludeSet.has(r.customerCode));
+            // Non-key: groups that are neither key nor sub
+            groupEntries = allGrouped.filter(r => !keyGroupNames.has(r.groupName) && !subGroupNames.has(r.groupName));
         }
 
         if (groupEntries.length === 0) {
@@ -233,6 +246,12 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
         const masterMap = {};
         for (const r of masterRows) masterMap[r.customerCode] = r;
 
+        let psSet = new Set();
+        if (canPS) {
+            const psRecs = await prisma.pendingSettlement.findMany({ where: { customerCode: { in: allCodes } }, select: { customerCode: true }, distinct: ['customerCode'] });
+            psSet = new Set(psRecs.map(r => r.customerCode));
+        }
+
         const fmt = (n) => '₹' + (n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
         const agingBadge = (d) => {
             if (!d) return '<span class="inline-flex items-center justify-center w-14 text-xs text-gray-300 dark:text-gray-600">—</span>';
@@ -240,6 +259,18 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
             return `<span class="inline-flex items-center justify-center rounded-full border w-14 py-0.5 text-[10px] font-bold ${cls}">${d}d</span>`;
         };
         const colSpan = isAdmin ? 7 : 6;
+
+        // Pre-compute group totals so we can sort by outstanding descending
+        const groupTotals = {};
+        for (const grp of Object.keys(groupMap)) {
+            let totalBalance = 0, totalCount = 0, maxAging = 0;
+            for (const c of groupMap[grp]) {
+                const inv = invoiceMap[c];
+                if (inv) { totalBalance += inv.balance; totalCount += inv.count; if (inv.maxAging > maxAging) maxAging = inv.maxAging; }
+            }
+            groupTotals[grp] = { totalBalance, totalCount, maxAging };
+        }
+        const sortedGroups = Object.keys(groupMap).sort((a, b) => groupTotals[b].totalBalance - groupTotals[a].totalBalance);
 
         let html = '<div class="overflow-x-auto"><table class="w-full border-collapse text-sm">';
         html += '<thead><tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-[var(--surface-tertiary)]">';
@@ -252,17 +283,13 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
         if (isAdmin) html += '<th class="w-8 px-2 py-2"></th>';
         html += '</tr></thead>';
         let grpIdx = 0;
-        for (const grp of Object.keys(groupMap).sort()) {
+        for (const grp of sortedGroups) {
             grpIdx++;
             const grpRowBase = grpIdx % 2 === 0 ? 'bg-gray-100' : 'bg-white';
-            const codes = groupMap[grp];
+            const codes = groupMap[grp].sort((a, b) => (invoiceMap[b]?.balance || 0) - (invoiceMap[a]?.balance || 0));
             const safeGrp = grp.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-            let totalBalance = 0, totalCount = 0, maxAging = 0;
-            for (const c of codes) {
-                const inv = invoiceMap[c];
-                if (inv) { totalBalance += inv.balance; totalCount += inv.count; if (inv.maxAging > maxAging) maxAging = inv.maxAging; }
-            }
+            const { totalBalance, totalCount, maxAging } = groupTotals[grp];
 
             let rowsHtml = '';
             let subIdx = 0;
@@ -279,7 +306,7 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
                 const safeName = name.replace(/</g, '&lt;').replace(/"/g, '&quot;');
                 rowsHtml += `<tr class="${subRowBase} border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-pointer transition-colors" onclick="window.location.href='/ar/invoices/${encodedCode}'">
   <td class="px-2 py-1.5 whitespace-nowrap"><span class="text-[11px] text-gray-400 dark:text-gray-500 font-mono">${escHtml(code)}</span></td>
-  <td class="px-2 py-1.5"><span class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate block max-w-[200px]" title="${name.replace(/"/g,'&quot;')}">${name.replace(/</g,'&lt;')}</span></td>
+  <td class="px-2 py-1.5"><div class="flex items-center gap-1.5 overflow-hidden"><span class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate" title="${name.replace(/"/g,'&quot;')}">${name.replace(/</g,'&lt;')}</span>${psSet.has(code) ? '<span class="inline-flex items-center flex-shrink-0 rounded px-1 py-0.5 text-[8px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800">PS</span>' : ''}</div></td>
   <td class="px-2 py-1.5 text-center">${m?.psrName ? `<span class="inline-flex items-center rounded-md px-1 py-px text-[10px] font-medium leading-tight bg-green-50 text-green-700 border border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800">${m.psrName.replace(/</g,'&lt;')}</span>` : '<span class="text-[11px] text-gray-300 dark:text-gray-600">—</span>'}</td>
   <td class="px-2 py-1.5 text-center whitespace-nowrap"><span class="text-xs font-bold text-gray-900 dark:text-gray-100">${fmt(balance)}</span></td>
   <td class="px-2 py-1.5 text-center whitespace-nowrap"><span class="text-[11px] text-gray-400 dark:text-gray-500">${count}</span></td>
@@ -331,16 +358,16 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
   <tr x-show="open" x-cloak class="border-b-2 border-violet-100 dark:border-violet-900">
     <td colspan="${colSpan}" class="p-0 px-3 pb-3">
       <div class="border-l-3 border-violet-300 dark:border-violet-800 bg-slate-50/60 dark:bg-[var(--surface-secondary)] rounded-b-lg overflow-hidden">
-      <table class="w-full border-collapse text-sm">
+      <table class="w-full table-fixed border-collapse text-sm">
         <thead>
           <tr class="border-b border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-[var(--surface-tertiary)]">
-            <th class="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Code</th>
-            <th class="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Customer</th>
-            <th class="px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">PSR</th>
-            <th class="px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Outstanding</th>
-            <th class="px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Inv</th>
-            <th class="px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Aging</th>
-            ${isAdmin ? '<th class="w-8 px-2 py-1.5"></th>' : ''}
+            <th class="w-[12%] px-2 py-1.5 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Code</th>
+            <th class="w-[40%] px-2 py-1.5 text-left text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Customer</th>
+            <th class="w-[12%] px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">PSR</th>
+            <th class="w-[16%] px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Outstanding</th>
+            <th class="w-[6%] px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Inv</th>
+            <th class="w-[10%] px-2 py-1.5 text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Aging</th>
+            ${isAdmin ? '<th class="w-[4%] px-2 py-1.5"></th>' : ''}
           </tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
@@ -364,7 +391,7 @@ router.get('/ar/groups-data', requireAuth, requireModule('ar_directory'), async 
         html += '</table></div>';
         res.send(html);
     } catch (err) {
-        console.error('Groups data error:', err);
+        logger.error({ err, route: 'GET /ar/groups-data' }, 'Error loading groups data');
         res.status(500).send('<div class="p-4 text-red-500 text-sm">Failed to load groups.</div>');
     }
 });

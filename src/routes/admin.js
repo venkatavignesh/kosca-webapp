@@ -7,6 +7,7 @@ const multer = require('multer');
 const ExcelJS = require('exceljs');
 const path   = require('path');
 const fs     = require('fs');
+const logger = require('../logger');
 
 const uploadsDir = path.join(__dirname, '../../uploads');
 const publicDir  = path.join(__dirname, '../../public');
@@ -74,7 +75,7 @@ router.get('/users', adminOnly, async (req, res) => {
         });
         res.render('admin/users', { users });
     } catch (error) {
-        console.error('Error fetching users:', error);
+        logger.error({ err: error, route: 'GET /admin/users' }, 'Error fetching users');
         res.status(500).render('error', {
             message: 'Internal Server Error',
             details: 'Could not fetch users list from database.'
@@ -147,7 +148,7 @@ router.post('/users/:id/edit', adminOnly, async (req, res) => {
 
         res.redirect('/admin/users');
     } catch (error) {
-        console.error('Error updating user:', error);
+        logger.error({ err: error, route: 'POST /admin/users/:id/edit', userId: req.params.id }, 'Error updating user');
 
         if (error.code === 'P2002') {
             return res.status(400).render('error', {
@@ -185,7 +186,7 @@ router.post('/users/:id/delete', adminOnly, async (req, res) => {
 
         res.redirect('/admin/users');
     } catch (error) {
-        console.error('Error deleting user:', error);
+        logger.error({ err: error, route: 'POST /admin/users/:id/delete', userId: req.params.id }, 'Error deleting user');
         res.status(500).send('Error deleting user');
     }
 });
@@ -241,7 +242,7 @@ router.get('/categories', canManageCategories, async (req, res) => {
             prefixes: KEY_ACCOUNT_PREFIXES
         });
     } catch (error) {
-        console.error('Error fetching categories:', error);
+        logger.error({ err: error, route: 'GET /admin/categories' }, 'Error fetching categories');
         res.status(500).render('error', { message: 'Internal Server Error', details: 'Could not fetch categories.' });
     }
 });
@@ -316,7 +317,7 @@ router.get('/site-assignments', canManageSiteAssignments, async (req, res) => {
         const totalPages = Math.ceil(totalCount / limit);
         res.render('admin/site_assignments', { customers, page, totalPages, totalCount, search, limit, siteNames });
     } catch (error) {
-        console.error('Error fetching site assignments:', error);
+        logger.error({ err: error, route: 'GET /admin/site-assignments' }, 'Error fetching site assignments');
         res.status(500).render('error', { message: 'Internal Server Error', details: 'Could not fetch site assignments.' });
     }
 });
@@ -340,7 +341,7 @@ router.post('/site-assignments/:code/move', canManageSiteAssignments, async (req
 
         res.redirect('/admin/site-assignments');
     } catch (error) {
-        console.error('Error moving customer site:', error);
+        logger.error({ err: error, route: 'POST /admin/site-assignments/:code/move', customerCode: req.params.code }, 'Error moving customer site');
         res.status(500).render('error', { message: 'Internal Server Error', details: 'Could not move customer.' });
     }
 });
@@ -366,7 +367,7 @@ router.post('/site-overrides', adminOnly, async (req, res) => {
 
         res.redirect('/ar');
     } catch (error) {
-        console.error('Error saving site override:', error);
+        logger.error({ err: error, route: 'POST /admin/site-overrides' }, 'Error saving site override');
         res.status(500).send('Error saving site override');
     }
 });
@@ -436,7 +437,7 @@ router.post('/group-import/parse', canManageGroupImport, groupUpload.single('exc
   </button>
 </div>`);
     } catch (err) {
-        console.error('Group import parse error:', err);
+        logger.error({ err, route: 'POST /admin/group-import/parse' }, 'Group import parse error');
         if (req.file) try { fs.unlinkSync(req.file.path); } catch (_) {}
         res.status(500).send('<p class="text-red-600 text-sm font-medium">Failed to read Excel file. Make sure it is a valid .xlsx file.</p>');
     }
@@ -601,7 +602,7 @@ router.post('/group-import/process', canManageGroupImport, async (req, res) => {
   ${groupCardsHtml}
 </div>`);
     } catch (err) {
-        console.error('Group import process error:', err);
+        logger.error({ err, route: 'POST /admin/group-import/process' }, 'Group import process error');
         res.status(500).send('<p class="text-red-600 text-sm font-medium">Failed to process file. Please try again.</p>');
     }
 });
@@ -621,7 +622,7 @@ router.post('/groups/create', canManageGroups, async (req, res) => {
         });
         res.send('');
     } catch (err) {
-        console.error('Error creating group:', err);
+        logger.error({ err, route: 'POST /admin/groups/create' }, 'Error creating group');
         res.status(500).send('Failed to create group.');
     }
 });
@@ -633,7 +634,7 @@ router.post('/groups/member/:customerCode/remove', canManageGroups, async (req, 
         await prisma.customerGroup.delete({ where: { customerCode } });
         res.send('');
     } catch (err) {
-        console.error('Error removing group member:', err);
+        logger.error({ err, route: 'POST /admin/groups/member/:customerCode/remove', customerCode: req.params.customerCode }, 'Error removing group member');
         res.status(500).send('Failed to remove member.');
     }
 });
@@ -662,7 +663,7 @@ router.post('/groups/:groupName/add-member', canManageGroups, async (req, res) =
         });
         res.send('');
     } catch (err) {
-        console.error('Error adding group member:', err);
+        logger.error({ err, route: 'POST /admin/groups/:groupName/add-member', groupName: req.params.groupName }, 'Error adding group member');
         res.status(500).send('Failed to add member.');
     }
 });
@@ -674,7 +675,7 @@ router.post('/groups/:groupName/delete', canManageGroups, async (req, res) => {
         await prisma.customerGroup.deleteMany({ where: { groupName } });
         res.send('');
     } catch (err) {
-        console.error('Error deleting group:', err);
+        logger.error({ err, route: 'POST /admin/groups/:groupName/delete', groupName: req.params.groupName }, 'Error deleting group');
         res.status(500).send('Failed to delete group.');
     }
 });

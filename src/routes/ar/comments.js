@@ -3,6 +3,7 @@ const express = require('express');
 const router  = express.Router();
 const prisma  = require('../../prisma');
 const { requireAuth, requireModule, requireRole } = require('../../middleware/auth');
+const logger = require('../../logger');
 
 // ======== COLLECTION COMMENTS ========
 
@@ -57,7 +58,7 @@ router.get('/ar/comments/:customerCode', requireAuth, requireModule('ar_director
             userRole: req.session.userRole
         });
     } catch (error) {
-        console.error('Error fetching comments:', error);
+        logger.error({ err: error, route: 'GET /ar/comments/:customerCode', customerCode: req.params.customerCode }, 'Error fetching comments');
         res.status(500).send('<div class="text-red-500 text-sm p-4">Error loading comments</div>');
     }
 });
@@ -95,7 +96,7 @@ router.post('/ar/comments', requireAuth, async (req, res) => {
             userRole: req.session.userRole
         });
     } catch (error) {
-        console.error('Error creating comment:', error);
+        logger.error({ err: error, route: 'POST /ar/comments', customerCode: req.body.customerCode }, 'Error creating comment');
         res.status(500).send('<div class="text-red-500 text-sm p-4">Error saving comment</div>');
     }
 });
@@ -138,7 +139,7 @@ router.put('/ar/comments/:id', requireAuth, async (req, res) => {
             userRole: req.session.userRole
         });
     } catch (error) {
-        console.error('Error editing comment:', error);
+        logger.error({ err: error, route: 'PUT /ar/comments/:id', commentId: req.params.id }, 'Error editing comment');
         res.status(500).send('<div class="text-red-500 text-sm p-4">Error editing comment</div>');
     }
 });
@@ -178,7 +179,7 @@ router.post('/ar/comments/:id/resolve', requireAuth, async (req, res) => {
             userRole: req.session.userRole
         });
     } catch (error) {
-        console.error('Error resolving comment:', error);
+        logger.error({ err: error, route: 'POST /ar/comments/:id/resolve', commentId: req.params.id }, 'Error resolving comment');
         res.status(500).send('<div class="text-red-500 text-sm p-4">Error resolving comment</div>');
     }
 });
@@ -211,7 +212,7 @@ router.post('/ar/comments/:id/delete', requireAuth, requireRole(['ADMIN']), asyn
         const canPost = req.session.userRole === 'ADMIN' || (req.session.userModules || []).includes('ar_comments');
         res.render('partials/comment_panel', { comments, customerCode, canPost, currentUserId: req.session.userId, userRole: req.session.userRole });
     } catch (error) {
-        console.error('Error deleting comment:', error);
+        logger.error({ err: error, route: 'POST /ar/comments/:id/delete', commentId: req.params.id }, 'Error deleting comment');
         res.status(500).send('<div class="text-red-500 text-sm p-4">Error deleting comment</div>');
     }
 });
@@ -224,7 +225,7 @@ router.post('/ar/comments/:customerCode/delete-all', requireAuth, requireRole(['
         const canPost = req.session.userRole === 'ADMIN' || (req.session.userModules || []).includes('ar_comments');
         res.render('partials/comment_panel', { comments: [], customerCode, canPost, currentUserId: req.session.userId, userRole: req.session.userRole });
     } catch (error) {
-        console.error('Error deleting all comments:', error);
+        logger.error({ err: error, route: 'POST /ar/comments/:customerCode/delete-all', customerCode: req.params.customerCode }, 'Error deleting all comments');
         res.status(500).send('<div class="text-red-500 text-sm p-4">Error deleting comments</div>');
     }
 });

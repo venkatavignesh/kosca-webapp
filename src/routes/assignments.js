@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prisma');
 const { requireAuth, requireModule } = require('../middleware/auth');
+const logger = require('../logger');
 
 // Protect all assignment routes — requires ar_assign module (ADMIN bypasses)
 router.use(requireAuth, requireModule('ar_assign'));
@@ -58,7 +59,7 @@ router.get('/', async (req, res) => {
             groupedByUser
         });
     } catch (error) {
-        console.error('Error loading assignments:', error);
+        logger.error({ err: error, route: 'GET /ar/assignments' }, 'Error loading assignments');
         res.status(500).send('Error loading assignments page');
     }
 });
@@ -91,7 +92,7 @@ router.post('/', async (req, res) => {
 
         res.redirect('/ar/assignments');
     } catch (error) {
-        console.error('Error creating assignment:', error);
+        logger.error({ err: error, route: 'POST /ar/assignments' }, 'Error creating assignment');
         res.redirect('/ar/assignments');
     }
 });
@@ -137,7 +138,7 @@ router.post('/toggle', async (req, res) => {
 
         res.send(badgeHtml);
     } catch (error) {
-        console.error('Error toggling assignment:', error);
+        logger.error({ err: error, route: 'POST /ar/assignments/toggle' }, 'Error toggling assignment');
         res.status(500).send('Error');
     }
 });
@@ -150,7 +151,7 @@ router.post('/:id/delete', async (req, res) => {
         });
         res.redirect('/ar/assignments');
     } catch (error) {
-        console.error('Error deleting assignment:', error);
+        logger.error({ err: error, route: 'POST /ar/assignments/:id/delete', assignmentId: req.params.id }, 'Error deleting assignment');
         res.redirect('/ar/assignments');
     }
 });

@@ -5,6 +5,7 @@ const prisma  = require('../../prisma');
 const { requireAuth, requireModule }    = require('../../middleware/auth');
 const { requireInvoicesAccess }         = require('./_shared');
 const { SUB_DISTRIBUTOR_CODES, getKeyAccountCodes } = require('../../config/categories');
+const logger = require('../../logger');
 
 // Render HTMX Table Partial — Grouped by Customer Code
 router.get('/ar/invoices', requireAuth, requireInvoicesAccess, async (req, res) => {
@@ -321,7 +322,7 @@ router.get('/ar/invoices', requireAuth, requireInvoicesAccess, async (req, res) 
             group
         });
     } catch (error) {
-        console.error('Error fetching invoices:', error);
+        logger.error({ err: error, route: 'GET /ar/invoices' }, 'Error fetching invoices');
         res.status(500).send('<div class="text-red-500">Error loading table data</div>');
     }
 });
@@ -379,7 +380,7 @@ router.get('/ar/invoices/:customerCode', requireAuth, requireModule('ar_director
         const view = req.headers['hx-request'] ? 'partials/invoice_details' : 'ar/customer_invoices';
         res.render(view, { invoices, customerName, mobileNo, customerCode, isDisputed, userRole: req.session.userRole, isAdmin, currentGroup, allGroups, psrName });
     } catch (error) {
-        console.error('Error fetching invoice details:', error);
+        logger.error({ err: error, route: 'GET /ar/invoices/:customerCode', customerCode: req.params.customerCode }, 'Error fetching invoice details');
         res.status(500).send('<tr><td colspan="5" class="text-red-500 text-center py-2">Error loading details</td></tr>');
     }
 });

@@ -4,6 +4,7 @@ const router  = express.Router();
 const { upload }                        = require('./_shared');
 const { uploadQueue, connection }       = require('../../queue');
 const { requireAuth, requireModule, requireRole } = require('../../middleware/auth');
+const logger = require('../../logger');
 
 // Handle File Upload - Page
 router.get('/ar/upload', requireAuth, requireModule('ar_upload'), async (req, res) => {
@@ -56,7 +57,7 @@ router.post('/ar/upload', requireAuth, requireModule('ar_upload'), upload.single
       ${label}: ${safeName} uploaded and added to processing queue. <a href="/ar" class="underline font-semibold">View Dashboard</a>
     </div>`);
     } catch (error) {
-        console.error('Upload Error:', error);
+        logger.error({ err: error, route: 'POST /ar/upload', uploadType: req.body.uploadType }, 'Upload error');
         res.status(500).send('<div class="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded relative" role="alert">An error occurred during file upload.</div>');
     }
 });
@@ -83,7 +84,7 @@ router.post('/ar/sync-now', requireAuth, requireRole(['ADMIN', 'MANAGER']), asyn
         }
         res.send('<div class="bg-green-50 dark:bg-green-950 border border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded">Sync triggered from network share. Check progress below.</div>');
     } catch (error) {
-        console.error('Sync-now Error:', error);
+        logger.error({ err: error, route: 'POST /ar/sync-now' }, 'Sync-now error');
         res.status(500).send('<div class="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Failed to trigger sync.</div>');
     }
 });
@@ -140,7 +141,7 @@ router.get('/ar/upload/status', requireAuth, async (req, res) => {
         res.render('partials/upload_progress', { progress, message, jobStatus, jobType, step });
 
     } catch (error) {
-        console.error('Error fetching queue status:', error);
+        logger.error({ err: error, route: 'GET /ar/upload/status' }, 'Error fetching queue status');
         res.send('<div id="ar-upload-progress" hx-get="/ar/upload/status" hx-trigger="every 2s" hx-swap="outerHTML" style="display:none;"></div>');
     }
 });
