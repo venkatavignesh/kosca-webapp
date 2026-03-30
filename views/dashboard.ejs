@@ -79,7 +79,7 @@
                 + '</div>';
         }
         var html = '<div style="background:var(--surface-primary);border-radius:14px;padding:14px 16px;margin-top:10px;border:1px solid var(--border-primary);box-shadow:0 1px 3px rgba(0,0,0,0.04)">'
-            + '<p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-primary);margin-bottom:10px;text-align:center">AR data as of ' + prevMonthDateLabel + '</p>'
+            + '<p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:10px;text-align:center">AR data as of <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:999px;padding:1px 8px 1px 6px;font-size:10px;font-weight:700;letter-spacing:0.06em;color:#6366f1;vertical-align:middle"><svg width="7" height="7" viewBox="0 0 7 7" fill="none" style="flex-shrink:0;margin-bottom:1px"><circle cx="3.5" cy="3.5" r="2.5" fill="#6366f1"/></svg>' + prevMonthDateLabel + '</span></p>'
             + '<div class="prevmonth-grid">';
         if (prevMonthOverall && prevMonthOverall.total.raw > 0) {
             html += card('var(--cat-blue-accent)', 'var(--cat-blue-label)', 'var(--cat-blue-bg)', 'Kosca Overall AR', prevMonthOverall.total.amount, prevMonthOverall.total.doors + ' doors');
